@@ -6,7 +6,7 @@ import type { FileOutcome } from './outcomes';
 
 export const PREVIOUS_VERSION_SUFFIX = ' (versão anterior)';
 
-const dirname = (relPath: string) => {
+export const dirname = (relPath: string) => {
   const i = relPath.lastIndexOf('/');
   return i >= 0 ? relPath.slice(0, i) : '';
 };
@@ -98,6 +98,7 @@ export async function runRift(ctx: RunContext & { client: DriveClient }): Promis
     }
 
     const copied = await ctx.client.copyFile(file.src_id, file.name, parentId);
+    ctx.onProgress?.(file.size);
     return { status: 'done', destId: copied.id, bytes: file.size };
   });
 }

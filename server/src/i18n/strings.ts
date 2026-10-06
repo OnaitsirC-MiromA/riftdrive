@@ -44,6 +44,10 @@ export const t = {
       return parts.join(' · ');
     },
   },
+  transfer: {
+    nativeSkipped: 'Documento nativo do Google (Docs, Sheets, Slides…): entre contas diferentes precisa de conversão, então ficou de fora.',
+    incomplete: (received: number, total: number) => `O upload terminou incompleto (${received} de ${total} bytes). Vou tentar de novo.`,
+  },
   inspect: {
     canceled: 'Leitura da pasta cancelada.',
     invalidLink: 'Isso não parece um link do Google Drive. Cole o link da pasta (drive.google.com/drive/folders/…).',

@@ -11,6 +11,7 @@ export interface RunContext {
   signal: AbortSignal;
   now: () => number;
   concurrency: number;
+  /** Bytes que avançaram — quem chama é o caminho (rift: ao concluir cada arquivo; máquina: a cada bloco). */
   onProgress?: (deltaBytes: number) => void;
 }
 
@@ -78,7 +79,6 @@ export async function runLoop(ctx: RunContext, processFile: (file: JobFileRow) =
         if (outcome.bytes !== reserved) quota.record(job.dest_account_id, outcome.bytes - reserved);
         reserved = 0;
         repo.setFile(job.id, file.rel_path, { status: 'done', dest_id: outcome.destId, last_error: null, upload_uri: null });
-        ctx.onProgress?.(outcome.bytes);
         consecutiveTransient = 0;
       } else if (outcome.status === 'deferred') {
         repo.setFile(job.id, file.rel_path, { status: 'deferred', deferred_until: outcome.until, last_error: outcome.error ?? null });
