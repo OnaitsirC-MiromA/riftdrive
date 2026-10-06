@@ -3,6 +3,9 @@ import { OAuthError } from '../auth/oauth';
 // Erro estruturado da API do Drive: status HTTP + `reason` (o campo que o
 // Google usa para dizer O QUE aconteceu, ex.: cannotCopyFile) + mensagem.
 export class DriveError extends Error {
+  /** Conta cuja chamada falhou — para o motor saber QUEM desconectou. */
+  accountId?: string;
+
   constructor(
     public status: number,
     public reason: string,

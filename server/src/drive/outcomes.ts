@@ -7,6 +7,8 @@ export interface PauseReason {
   /** Quando retomar sozinho (epoch ms); null = só por ação externa (reconectar, liberar espaço). */
   until: number | null;
   message: string;
+  /** Em pausa por auth: qual conta desconectou. */
+  accountId?: string;
 }
 
 // Lançado de dentro do laço quando o job inteiro precisa parar — não é um erro

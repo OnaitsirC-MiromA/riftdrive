@@ -1,6 +1,7 @@
 import type { JobFileRow, JobRow } from '../types';
 import type { JobsRepo } from '../jobs/repo';
 import { nextResetAt, type QuotaService } from './quota';
+import { DriveError } from './errors';
 import { DAY, HOUR, JobPaused, classifyFailure, type FileOutcome, type PauseReason } from './outcomes';
 import { t } from '../i18n/strings';
 
@@ -103,7 +104,7 @@ export async function runLoop(ctx: RunContext, processFile: (file: JobFileRow) =
           requestPause({ kind: 'quota', until: ctx.now() + HOUR, message: t.jobs.dailyLimit });
           break;
         case 'pause_auth':
-          requestPause({ kind: 'auth', until: null, message: t.jobs.auth });
+          requestPause({ kind: 'auth', until: null, message: t.jobs.auth, accountId: err instanceof DriveError ? err.accountId : undefined });
           break;
         case 'pause_storage':
           requestPause({ kind: 'storage', until: null, message: t.jobs.storage });

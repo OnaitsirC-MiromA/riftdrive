@@ -44,6 +44,11 @@ export const t = {
       return parts.join(' · ');
     },
   },
+  resync: {
+    notFound: 'Cópia não encontrada.',
+    checkFirst: 'Faça a verificação de novidades antes de sincronizar.',
+    nothingSelected: 'Nenhuma pasta selecionada tem novidades.',
+  },
   transfer: {
     nativeSkipped: 'Documento nativo do Google (Docs, Sheets, Slides…): entre contas diferentes precisa de conversão, então ficou de fora.',
     incomplete: (received: number, total: number) => `O upload terminou incompleto (${received} de ${total} bytes). Vou tentar de novo.`,

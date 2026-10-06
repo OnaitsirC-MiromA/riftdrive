@@ -116,6 +116,7 @@ export class DriveClient {
       if (res.ok || (r.allow308 && res.status === 308)) return res;
 
       const error = await toDriveError(res);
+      error.accountId = this.accountId;
       if (error.status === 401 && !retriedAuth) {
         retriedAuth = true;
         this.tokens.invalidate(this.accountId);
