@@ -4,8 +4,11 @@ import type { Db } from './db';
 import type { AppDeps } from './deps';
 import { registerSpa } from './spa';
 import { WEB_ASSETS } from './bundled';
+import { registerLocalOriginGuard } from './security';
 import { healthRoutes } from './routes/health';
 import { infoRoutes } from './routes/info';
+import { authRoutes } from './routes/auth';
+import { accountsRoutes } from './routes/accounts';
 
 export function buildApp(config: AppConfig, db: Db, deps: AppDeps): FastifyInstance {
   void config;
@@ -25,8 +28,12 @@ export function buildApp(config: AppConfig, db: Db, deps: AppDeps): FastifyInsta
     }
   });
 
+  registerLocalOriginGuard(app);
+
   app.register(healthRoutes);
   app.register(infoRoutes, { deps });
+  app.register(authRoutes, { deps });
+  app.register(accountsRoutes, { deps });
   // [ROUTES]
 
   // A interface vem embutida no build, não do disco — ver spa.ts.
