@@ -246,12 +246,15 @@ export class FakeDrive {
     if (!acc) return gerr(401, 'authError', 'Invalid Credentials');
 
     const body = typeof init.body === 'string' ? (JSON.parse(init.body) as Record<string, any>) : null;
-    const path = u.pathname;
+    // "root" é o apelido que a API real aceita para a raiz do Meu Drive da conta.
+    const resolve = (id: string | undefined): string | undefined => (id === 'root' ? this.rootOf(acc.id) : id);
+    if (body?.parents?.[0]) body.parents[0] = resolve(body.parents[0]);
+    const path = u.pathname.replace(/\/drive\/v3\/files\/root(\/|$)/, `/drive/v3/files/${this.rootOf(acc.id)}$1`);
 
     if (path === '/drive/v3/about') return json({ user: { emailAddress: acc.email } });
 
     if (path === '/drive/v3/files' && method === 'GET') {
-      const parent = u.searchParams.get('q')?.match(/'([^']+)' in parents/)?.[1] ?? '';
+      const parent = resolve(u.searchParams.get('q')?.match(/'([^']+)' in parents/)?.[1]) ?? '';
       const kids = this.children(parent).filter((n) => this.canRead(n, acc.id));
       const size = Number(u.searchParams.get('pageSize') ?? 100);
       const off = Number(u.searchParams.get('pageToken') ?? 0);

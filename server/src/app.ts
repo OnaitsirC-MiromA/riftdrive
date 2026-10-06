@@ -9,6 +9,11 @@ import { healthRoutes } from './routes/health';
 import { infoRoutes } from './routes/info';
 import { authRoutes } from './routes/auth';
 import { accountsRoutes } from './routes/accounts';
+import { inspectRoutes } from './routes/inspect';
+import { jobsRoutes } from './routes/jobs';
+import { copiesRoutes } from './routes/copies';
+import { settingsRoutes } from './routes/settings';
+import { quotaRoutes } from './routes/quota';
 
 export function buildApp(config: AppConfig, db: Db, deps: AppDeps): FastifyInstance {
   void config;
@@ -34,6 +39,11 @@ export function buildApp(config: AppConfig, db: Db, deps: AppDeps): FastifyInsta
   app.register(infoRoutes, { deps });
   app.register(authRoutes, { deps });
   app.register(accountsRoutes, { deps });
+  app.register(inspectRoutes, { deps });
+  app.register(jobsRoutes, { deps });
+  app.register(copiesRoutes, { deps });
+  app.register(settingsRoutes, { deps });
+  app.register(quotaRoutes, { deps });
   // [ROUTES]
 
   // A interface vem embutida no build, não do disco — ver spa.ts.

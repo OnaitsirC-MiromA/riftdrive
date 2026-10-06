@@ -21,6 +21,13 @@ export const t = {
   accounts: {
     notFound: 'Conta não encontrada.',
     noClient: 'Configure primeiro o ID e o segredo do OAuth client (passo 1 do assistente).',
+    none: 'Conecte uma conta do Google antes de analisar um link.',
+  },
+  drive: {
+    myDrive: 'Meu Drive',
+  },
+  settings: {
+    invalid: 'Configuração inválida: modo de cota (limit/unlimited), GB por dia (> 0), hora de renovação (0–23) ou destino padrão.',
   },
   auth: {
     badClientId: 'O ID do cliente precisa terminar em .apps.googleusercontent.com (copie do Google Cloud → Credenciais).',
@@ -35,6 +42,8 @@ export const t = {
     storage: 'O Drive de destino está sem espaço. Libere espaço e retome.',
     offline: 'Sem conexão. Retomo quando a rede voltar.',
     inspectionExpired: 'A análise expirou. Cole o link de novo para analisar.',
+    notFound: 'Cópia não encontrada.',
+    running: 'Essa cópia está em andamento. Pause ou cancele antes de remover.',
     summary: (p: { done: number; blocked: number; native: number; missing: number; failed: number }) => {
       const parts = [`${p.done} ${p.done === 1 ? 'arquivo copiado' : 'arquivos copiados'}`];
       if (p.blocked) parts.push(`${p.blocked} bloqueado${p.blocked > 1 ? 's' : ''} pelo dono`);

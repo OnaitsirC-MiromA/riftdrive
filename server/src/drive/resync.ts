@@ -1,4 +1,4 @@
-import type { JobRow } from '../types';
+import type { JobPath, JobRow } from '../types';
 import type { JobsRepo } from '../jobs/repo';
 import type { DriveClient } from './client';
 import { listTree, type Tree, type TreeEntry } from './tree';
@@ -28,10 +28,14 @@ const groupOf = (relPath: string): string => (relPath.includes('/') ? relPath.sl
  * não têm bytes para comparar — só contam como novos. Agrupado pela primeira
  * pasta, que é a granularidade em que o usuário escolhe o que baixar.
  */
-export function diffTrees(src: Tree, dst: Tree): DiffGroup[] {
+export function diffTrees(src: Tree, dst: Tree, path?: JobPath): DiffGroup[] {
   const dstMap = new Map(dst.files.map((f) => [f.relPath, f]));
   const groups = new Map<string, DiffGroup>();
   for (const f of src.files) {
+    // O que nunca vai poder ser copiado por este caminho não é "novidade":
+    // apareceria para sempre e seria pulado para sempre.
+    if (path === 'rift' && !f.canCopy) continue;
+    if (path === 'machine' && (f.isNative || !f.canDownload)) continue;
     const d = dstMap.get(f.relPath);
     let kind: DiffFile['kind'] | null = null;
     if (!d) kind = 'new';
@@ -65,7 +69,7 @@ export class ResyncService {
     if (!copy) throw new Error(t.resync.notFound);
     const src = await listTree(this.deps.clientFor(copy.src_reader_account_id), copy.src_folder_id);
     const dst = await listTree(this.deps.clientFor(copy.dest_account_id), copy.dest_folder_id);
-    const groups = diffTrees(src, dst);
+    const groups = diffTrees(src, dst, copy.path);
     this.lastDiff.set(copyId, groups);
     this.deps.repo.touchCopy(copyId, { checked: true });
     return { groups: groups.map(({ files: _files, ...g }) => g) };

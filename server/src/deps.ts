@@ -4,6 +4,12 @@ import { SettingsRepo } from './settings/repo';
 import { OauthClientRepo } from './auth/client-config';
 import { AccountsRepo, AccountsService } from './auth/accounts';
 import { LoginFlow } from './auth/login-flow';
+import { DriveClient } from './drive/client';
+import { QuotaService } from './drive/quota';
+import { InspectionCache } from './drive/inspections';
+import { ResyncService } from './drive/resync';
+import { JobsRepo } from './jobs/repo';
+import { JobEngine } from './jobs/engine';
 import { openBrowser as defaultOpenBrowser } from './open-browser';
 
 // Tudo o que as rotas e o motor precisam, num lugar só. Os testes trocam o que
@@ -15,6 +21,12 @@ export interface AppDeps {
   accountsRepo: AccountsRepo;
   accounts: AccountsService;
   login: LoginFlow;
+  jobsRepo: JobsRepo;
+  quota: QuotaService;
+  clientFor: (accountId: string) => DriveClient;
+  inspections: InspectionCache;
+  engine: JobEngine;
+  resync: ResyncService;
   fetchFn: typeof fetch;
   openBrowser: (url: string) => void;
   /** E-mail da conta dona de um access token. */
@@ -42,5 +54,11 @@ export function buildDeps(config: AppConfig, db: Db, overrides: Partial<AppDeps>
   const accounts = overrides.accounts ?? new AccountsService(accountsRepo, oauthClient, fetchFn);
   const aboutEmail = overrides.aboutEmail ?? ((token: string) => aboutEmailViaDrive(token, fetchFn));
   const login = overrides.login ?? new LoginFlow({ repo: accountsRepo, oauthClient, fetchFn, openBrowser, aboutEmail });
-  return { db, settings, oauthClient, accountsRepo, accounts, login, fetchFn, openBrowser, aboutEmail };
+  const jobsRepo = overrides.jobsRepo ?? new JobsRepo(db);
+  const quota = overrides.quota ?? new QuotaService(db, settings);
+  const clientFor = overrides.clientFor ?? ((accountId: string) => new DriveClient(accountId, accounts, fetchFn));
+  const inspections = overrides.inspections ?? new InspectionCache();
+  const engine = overrides.engine ?? new JobEngine({ repo: jobsRepo, accountsRepo, clientFor, quota, log: (m) => console.log(`[motor] ${m}`) });
+  const resync = overrides.resync ?? new ResyncService({ repo: jobsRepo, clientFor });
+  return { db, settings, oauthClient, accountsRepo, accounts, login, jobsRepo, quota, clientFor, inspections, engine, resync, fetchFn, openBrowser, aboutEmail };
 }

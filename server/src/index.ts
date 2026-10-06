@@ -22,6 +22,7 @@ const app = buildApp(config, db, deps);
 const hasUi = Boolean(WEB_ASSETS['/index.html']);
 
 const shutdown = () => {
+  deps.engine.stop();
   app.close().finally(() => process.exit(0));
 };
 process.on('SIGTERM', shutdown);
@@ -51,6 +52,11 @@ async function main(): Promise<void> {
     );
 
     if (opening) openBrowser(url);
+
+    // O motor só sobe depois do servidor: um job que estava no meio quando o
+    // processo morreu volta à fila e recomeça do inventário.
+    deps.engine.recoverOnBoot();
+    deps.engine.start(1000);
   } catch (err) {
     console.error(`\n${err instanceof Error ? err.message : err}\n`);
     process.exit(1);
