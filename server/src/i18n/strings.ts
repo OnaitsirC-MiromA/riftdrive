@@ -26,4 +26,14 @@ export const t = {
     badClientId: 'O ID do cliente precisa terminar em .apps.googleusercontent.com (copie do Google Cloud → Credenciais).',
     badClientSecret: 'O segredo do cliente parece incompleto.',
   },
+  inspect: {
+    canceled: 'Leitura da pasta cancelada.',
+    invalidLink: 'Isso não parece um link do Google Drive. Cole o link da pasta (drive.google.com/drive/folders/…).',
+    notAFolder: 'O link aponta para um arquivo. O RiftDrive copia pastas — cole o link da pasta que contém o arquivo.',
+    noAccess: (email: string) =>
+      `Nenhuma conta conectada tem acesso a essa pasta. Peça ao dono para compartilhar com ${email}, ou conecte a conta que tem acesso.`,
+    destUnreachable: 'A conta de destino não está conectada.',
+    shareRequest: (name: string, email: string) =>
+      `Oi! Você pode compartilhar a pasta "${name}" com ${email}? Assim eu faço a cópia direto dentro do Google Drive, sem baixar nada. Obrigado!`,
+  },
 };
