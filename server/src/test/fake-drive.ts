@@ -95,7 +95,18 @@ export class FakeDrive {
     return `root-${accountId}`;
   }
 
-  private put(n: Partial<FakeNode> & { name: string; mimeType: string; parentId: string; owner: string }): FakeNode {
+  private put(n: {
+    id?: string;
+    name: string;
+    mimeType: string;
+    parentId: string;
+    owner: string;
+    content?: Buffer;
+    canCopy?: boolean;
+    canDownload?: boolean;
+    shortcutTarget?: string | null;
+    readers?: string[];
+  }): FakeNode {
     const content = n.content ?? Buffer.alloc(0);
     const binary = n.mimeType !== FOLDER_MIME && n.mimeType !== SHORTCUT_MIME && !isNativeGoogleMime(n.mimeType);
     const node: FakeNode = {
