@@ -26,6 +26,24 @@ export const t = {
     badClientId: 'O ID do cliente precisa terminar em .apps.googleusercontent.com (copie do Google Cloud → Credenciais).',
     badClientSecret: 'O segredo do cliente parece incompleto.',
   },
+  jobs: {
+    waitingDownloadQuota: 'Alguns arquivos atingiram a cota de download do Google; retomo quando ela renovar (~24 h).',
+    rateLimited: 'O Google está limitando as chamadas desta conta; retomo em 1 hora.',
+    quotaDay: (time: string) => `Cota do dia atingida; retomo às ${time}.`,
+    dailyLimit: 'O Google cortou o volume do dia desta conta; tento de novo em 1 hora.',
+    auth: 'A conta do Google desconectou. Reconecte para continuar.',
+    storage: 'O Drive de destino está sem espaço. Libere espaço e retome.',
+    offline: 'Sem conexão. Retomo quando a rede voltar.',
+    inspectionExpired: 'A análise expirou. Cole o link de novo para analisar.',
+    summary: (p: { done: number; blocked: number; native: number; missing: number; failed: number }) => {
+      const parts = [`${p.done} ${p.done === 1 ? 'arquivo copiado' : 'arquivos copiados'}`];
+      if (p.blocked) parts.push(`${p.blocked} bloqueado${p.blocked > 1 ? 's' : ''} pelo dono`);
+      if (p.native) parts.push(`${p.native} documento${p.native > 1 ? 's' : ''} do Google fora`);
+      if (p.missing) parts.push(`${p.missing} sumiu${p.missing > 1 ? 'ram' : ''} da origem`);
+      if (p.failed) parts.push(`${p.failed} com falha`);
+      return parts.join(' · ');
+    },
+  },
   inspect: {
     canceled: 'Leitura da pasta cancelada.',
     invalidLink: 'Isso não parece um link do Google Drive. Cole o link da pasta (drive.google.com/drive/folders/…).',

@@ -61,10 +61,13 @@ export class QuotaService {
     return used + bytes <= s.limitBytes;
   }
 
+  // Negativo devolve uma reserva não usada (o laço reserva antes de copiar).
   record(accountId: string, bytes: number): void {
+    const key = dayKey(this.now(), this.settings().resetHour);
     this.db
       .prepare('INSERT INTO quota_usage(account_id, day_key, bytes) VALUES(?, ?, ?) ON CONFLICT(account_id, day_key) DO UPDATE SET bytes = bytes + excluded.bytes')
-      .run(accountId, dayKey(this.now(), this.settings().resetHour), bytes);
+      .run(accountId, key, bytes);
+    this.db.prepare('UPDATE quota_usage SET bytes = 0 WHERE account_id = ? AND day_key = ? AND bytes < 0').run(accountId, key);
   }
 
   evaluate(accountId: string, bytes: number): QuotaEvaluation {
