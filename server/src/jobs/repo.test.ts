@@ -43,9 +43,9 @@ describe('JobsRepo', () => {
     r.setFile(j.id, 'c', { status: 'deferred', deferred_until: 1000 });
     expect(r.nextPending(j.id, 10).map((f) => f.rel_path)).toEqual(['b', 'a']);
     expect(r.countPending(j.id)).toEqual({ pending: 2, deferredFuture: 1, minDeferredUntil: 1000 });
-    now = 2000;
+    now = 2000; // o deferido venceu: volta a contar como pronto para processar
     expect(r.nextPending(j.id, 10).map((f) => f.rel_path)).toEqual(['b', 'c', 'a']);
-    expect(r.countPending(j.id)).toEqual({ pending: 2, deferredFuture: 0, minDeferredUntil: 1000 });
+    expect(r.countPending(j.id)).toEqual({ pending: 3, deferredFuture: 0, minDeferredUntil: 1000 });
     expect(r.nextPending(j.id, 1)).toHaveLength(1);
   });
 
