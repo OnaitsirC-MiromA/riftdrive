@@ -70,7 +70,7 @@ export default function Home() {
             {s.home.analyze}
           </Button>
         </form>
-        <QuotaLine />
+        {accounts.length > 0 && <QuotaLine />}
         {analyzing && (
           <div className="flex items-center gap-3 text-muted text-[13px] card px-4 py-3" aria-live="polite">
             <PortalMark size={22} animated className="text-fg" />

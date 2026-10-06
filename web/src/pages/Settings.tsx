@@ -161,8 +161,10 @@ function CopySection() {
       <dl className="grid grid-cols-[120px_1fr] gap-x-4 gap-y-3 text-[13px] items-start">
         <dt className="label pt-1.5">{s.settings.defaultFolder}</dt>
         <dd>
-          {account && (
+          {account ? (
             <FolderPicker accountId={account.id} value={value} onChange={(f) => patch.mutate({ defaultDest: { accountId: account.id, folderId: f.id, folderName: f.name } })} />
+          ) : (
+            <span className="text-muted">—</span>
           )}
         </dd>
         <dt className="label pt-0.5">Bloqueados</dt>
