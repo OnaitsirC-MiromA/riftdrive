@@ -1,0 +1,134 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Barlow+Condensed:wght@500;700&family=Nunito:wght@500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+  .brand-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 16px; }
+  .brand { border-radius: 14px; overflow: hidden; border: 2px solid transparent; cursor: pointer; transition: transform .15s, border-color .15s; background: var(--bg-secondary); }
+  .brand:hover { transform: translateY(-2px); }
+  .brand.selected { border-color: var(--selected-border); }
+  .board { padding: 28px 24px 22px; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; }
+  .wordmark { display: flex; align-items: center; gap: 12px; }
+  .tag { font-size: 14px; opacity: .85; line-height: 1.4; }
+  .meta { padding: 16px 20px 20px; display: grid; gap: 12px; }
+  .meta h3 { margin: 0; font-size: 15px; }
+  .meta p { margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .swatches { display: flex; gap: 6px; }
+  .swatches span { flex: 1; height: 22px; border-radius: 5px; border: 1px solid rgba(0,0,0,.08); }
+  .tone { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tone span { font-size: 11px; padding: 3px 8px; border-radius: 999px; background: var(--bg-tertiary); color: var(--text-secondary); }
+  .ui-row { border-radius: 8px; padding: 10px 12px; display: grid; gap: 7px; font-size: 12px; }
+  .ui-row .t { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .ui-row .bar { height: 6px; border-radius: 3px; overflow: hidden; }
+  .ui-row .bar i { display: block; height: 100%; width: 63%; }
+  .chip { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; }
+  .num { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; }
+  .pick { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-tertiary); }
+</style>
+
+<h2>Que marca esse app veste?</h2>
+<p class="subtitle">Três direções — nome, metáfora, paleta e o jeito que a interface fala. Pode escolher o nome de uma e a cara de outra; me diga no terminal.</p>
+
+<div class="cards brand-grid">
+
+  <!-- A · BALSA -->
+  <div class="card brand" data-choice="balsa" onclick="toggleSelect(this)">
+    <div class="board" style="background:#0F2538;color:#F4F7FA;font-family:'DM Sans',system-ui,sans-serif;">
+      <div class="wordmark">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <path d="M6 27h28" stroke="#1FA39E" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M6 32c3 0 3 2 6 2s3-2 6-2 3 2 6 2 3-2 6-2 3 2 6 2" stroke="#1FA39E" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+          <path d="M11 27l2.5-8h13l2.5 8z" fill="#F4F7FA"/>
+          <rect x="16" y="13" width="8" height="6" rx="1" fill="#F2B134"/>
+        </svg>
+        <span style="font-size:34px;font-weight:700;letter-spacing:-0.02em;line-height:1">balsa</span>
+      </div>
+      <div class="tag">Leva seus arquivos de um Drive ao outro.<br><span style="opacity:.6">Sem passar pela sua máquina, sempre que der.</span></div>
+    </div>
+    <div class="meta">
+      <h3>A · Balsa — náutico, calmo, premium</h3>
+      <p>A balsa atravessa cargas entre duas margens. As margens são os dois Drives — ou a margem "compartilhado comigo" e a sua. Cópia longa como uma travessia: previsível, sem pressa, sem susto.</p>
+      <div class="swatches">
+        <span style="background:#0F2538" title="Mar profundo"></span>
+        <span style="background:#1FA39E" title="Verde-mar (ação)"></span>
+        <span style="background:#F2B134" title="Âmbar (aviso/orçamento)"></span>
+        <span style="background:#E8E1D3" title="Areia"></span>
+        <span style="background:#F4F7FA" title="Espuma"></span>
+      </div>
+      <div class="tone"><span>sóbrio</span><span>confiável</span><span>espaço generoso</span><span>escuro por padrão</span></div>
+      <div class="ui-row" style="background:#152E44;color:#F4F7FA;font-family:'DM Sans',system-ui,sans-serif;">
+        <div class="t"><strong style="font-weight:500">Asimov 2026</strong><span class="chip" style="background:rgba(31,163,158,.18);color:#5ED3CE">servidor-a-servidor</span></div>
+        <div class="bar" style="background:rgba(255,255,255,.1)"><i style="background:#1FA39E"></i></div>
+        <div class="t" style="opacity:.7"><span class="num">197 / 312 arquivos</span><span class="num">30,4 de 48,2 GB</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B · TRANSBORDO -->
+  <div class="card brand" data-choice="transbordo" onclick="toggleSelect(this)">
+    <div class="board" style="background:#1B1E23;color:#F2F2F0;font-family:'Barlow Condensed',system-ui,sans-serif;">
+      <div class="wordmark">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <rect x="4" y="14" width="13" height="13" rx="1.5" stroke="#9AA3AD" stroke-width="2.2"/>
+          <rect x="23" y="14" width="13" height="13" rx="1.5" fill="#FF7A1A"/>
+          <path d="M17 20.5h6M20.5 17.5l3 3-3 3" stroke="#F2F2F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span style="font-size:36px;font-weight:700;letter-spacing:.06em;line-height:1;text-transform:uppercase">Transbordo</span>
+      </div>
+      <div class="tag" style="font-family:system-ui,sans-serif">Transfere acervos entre Drives. Fila, orçamento diário, retomada.<br><span style="opacity:.6">Feito para operação longa, não para um arquivo.</span></div>
+    </div>
+    <div class="meta">
+      <h3>B · Transbordo — logístico, técnico, denso</h3>
+      <p>Transbordo é passar a carga de um veículo a outro sem desfazer o lote. Fala para quem move terabytes: números em destaque, status explícito, nada de enfeite. Mais "ferramenta de operação" que "app".</p>
+      <div class="swatches">
+        <span style="background:#1B1E23" title="Grafite"></span>
+        <span style="background:#FF7A1A" title="Laranja de sinalização"></span>
+        <span style="background:#9AA3AD" title="Cinza frio"></span>
+        <span style="background:#2A2F36" title="Aço"></span>
+        <span style="background:#F2F2F0" title="Branco quente"></span>
+      </div>
+      <div class="tone"><span>direto</span><span>industrial</span><span>números monoespaçados</span><span>alto contraste</span></div>
+      <div class="ui-row" style="background:#23272E;color:#F2F2F0;font-family:system-ui,sans-serif;">
+        <div class="t"><strong style="font-weight:600;font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.03em">ASIMOV 2026</strong><span class="chip" style="background:#FF7A1A;color:#1B1E23">S2S</span></div>
+        <div class="bar" style="background:#2A2F36"><i style="background:#FF7A1A"></i></div>
+        <div class="t" style="color:#9AA3AD"><span class="num">197/312</span><span class="num">30.4 GB / 48.2 GB · 63%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C · CARRETO -->
+  <div class="card brand" data-choice="carreto" onclick="toggleSelect(this)">
+    <div class="board" style="background:#FBF6EE;color:#23201C;font-family:'Nunito',system-ui,sans-serif;">
+      <div class="wordmark">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <rect x="7" y="13" width="18" height="16" rx="3" fill="#C8502B"/>
+          <path d="M7 19h18" stroke="#FBF6EE" stroke-width="2"/>
+          <path d="M28 21h7M31 17.5l4 3.5-4 3.5" stroke="#1F4D3A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span style="font-size:34px;font-weight:800;letter-spacing:-0.01em;line-height:1;color:#1F4D3A">Carreto</span>
+      </div>
+      <div class="tag">Seu Drive, de um lado pro outro.<br><span style="opacity:.6">Cole o link, escolha a pasta, a gente leva.</span></div>
+    </div>
+    <div class="meta">
+      <h3>C · Carreto — próximo, brasileiro, de serviço</h3>
+      <p>"Fazer um carreto" é contratar quem leva suas coisas de um lugar a outro. Caloroso e sem jargão — a interface conversa. Memorável; o mais informal dos três, e o que menos soa "profissional" à primeira vista.</p>
+      <div class="swatches">
+        <span style="background:#FBF6EE" title="Papel"></span>
+        <span style="background:#C8502B" title="Terracota"></span>
+        <span style="background:#1F4D3A" title="Verde-mata"></span>
+        <span style="background:#E9B44C" title="Mostarda"></span>
+        <span style="background:#23201C" title="Carvão"></span>
+      </div>
+      <div class="tone"><span>caloroso</span><span>claro por padrão</span><span>cantos arredondados</span><span>texto que conversa</span></div>
+      <div class="ui-row" style="background:#FFFFFF;color:#23201C;border:1px solid #EADFCB;font-family:'Nunito',system-ui,sans-serif;">
+        <div class="t"><strong style="font-weight:700">Asimov 2026</strong><span class="chip" style="background:#E6F1EB;color:#1F4D3A">direto no Drive</span></div>
+        <div class="bar" style="background:#F1E9DB"><i style="background:#C8502B"></i></div>
+        <div class="t" style="opacity:.65"><span>197 de 312 arquivos</span><span>30,4 de 48,2 GB</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:22px">
+  <span class="pick">Minha recomendação</span> &nbsp;<strong>Balsa</strong>. A metáfora das duas margens encaixa nos dois cenários de cópia, o tom calmo combina com operação longa e "confiança no progresso", e o nome funciona em português e fora dele.
+</p>

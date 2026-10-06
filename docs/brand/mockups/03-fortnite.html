@@ -1,0 +1,133 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+  .name-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 16px; }
+  .name { border-radius: 14px; overflow: hidden; border: 2px solid transparent; cursor: pointer; transition: transform .15s, border-color .15s; background: var(--bg-secondary); }
+  .name:hover { transform: translateY(-2px); }
+  .name.selected { border-color: var(--selected-border); }
+  .board { background: #0F1B2A; color: #F4F7FA; padding: 30px 26px 24px; min-height: 160px; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; font-family: 'DM Sans', system-ui, sans-serif; }
+  .wm { display: flex; align-items: center; gap: 14px; }
+  .wm b { font-size: 32px; font-weight: 700; letter-spacing: -0.025em; line-height: 1; }
+  .tag { font-size: 14px; line-height: 1.45; opacity: .85; }
+  .cmd { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; background: rgba(255,255,255,.07); padding: 5px 9px; border-radius: 6px; display: inline-block; align-self: flex-start; }
+  .cmd.warn { background: rgba(242,177,52,.14); color: #F2B134; }
+  .meta { padding: 16px 20px 20px; display: grid; gap: 10px; }
+  .meta h3 { margin: 0; font-size: 15px; }
+  .meta p { margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .meta p strong { color: var(--text-primary); font-weight: 600; }
+  .fn { font-size: 12px; color: var(--text-tertiary); border-left: 2px solid var(--border); padding-left: 10px; line-height: 1.5; }
+  .pick { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-tertiary); }
+  .extra { margin-top: 26px; padding: 14px 18px; border-radius: 10px; background: var(--bg-secondary); border: 1px solid var(--border); font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+  .extra code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: var(--text-primary); }
+</style>
+
+<h2>Vocabulário de Fortnite como marca</h2>
+<p class="subtitle">Fui atrás dos termos do jogo que falam de <em>levar alguém de um ponto a outro</em> — é a mesma coisa que o app faz com arquivos. Mesma base visual escura em todos; a cara fica para a próxima tela.</p>
+
+<div class="cards name-grid">
+
+  <!-- A · RIFT -->
+  <div class="card name" data-choice="rift" onclick="toggleSelect(this)">
+    <div class="board">
+      <div class="wm">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+          <ellipse cx="22" cy="22" rx="7" ry="15" stroke="#1FA39E" stroke-width="2.4"/>
+          <ellipse cx="22" cy="22" rx="2.6" ry="9" fill="#1FA39E" opacity=".9"/>
+          <rect x="3" y="18" width="8" height="8" rx="1.6" stroke="#F4F7FA" stroke-width="2"/>
+          <rect x="33" y="18" width="8" height="8" rx="1.6" fill="#F4F7FA"/>
+        </svg>
+        <b>Rift</b>
+      </div>
+      <div class="tag">Seus arquivos aparecem do outro lado.<br><span style="opacity:.6">Do Drive deles para o seu — sem viajar pela sua máquina.</span></div>
+      <span class="cmd">npx riftdrive</span>
+    </div>
+    <div class="meta">
+      <h3>A · Rift — o portal</h3>
+      <p>No jogo, o <em>rift</em> é a fenda na realidade que te teleporta para outro ponto do mapa na hora. É <strong>exatamente</strong> a cópia servidor-a-servidor: o arquivo não atravessa nada, simplesmente surge no destino. Nome curto, soa a tecnologia, nada infantil. <strong>Risco:</strong> <code>rift</code> puro está tomado no npm — o comando seria <code>riftdrive</code> ou <code>driverift</code>; e há um headset famoso (Oculus Rift).</p>
+      <div class="fn">Fortnite: rifts chegaram na Temporada 5 (2018); o item portátil é o "Rift-To-Go".</div>
+    </div>
+  </div>
+
+  <!-- B · ZIPLINE -->
+  <div class="card name" data-choice="zipline" onclick="toggleSelect(this)">
+    <div class="board">
+      <div class="wm">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+          <path d="M7 10v25M37 22v13" stroke="#F4F7FA" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M7 12L37 23" stroke="#1FA39E" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="22" cy="17.6" r="3.2" fill="#1FA39E"/>
+          <path d="M22 20.8v5" stroke="#1FA39E" stroke-width="2" stroke-linecap="round"/>
+          <rect x="18" y="25.5" width="8" height="6" rx="1.4" fill="#F4F7FA"/>
+        </svg>
+        <b>Zipline</b>
+      </div>
+      <div class="tag">Uma linha entre dois Drives. Os arquivos deslizam por ela.<br><span style="opacity:.6">É a ponte que você pediu — só que com movimento.</span></div>
+      <span class="cmd warn">npx zipline — tomado · usar zipline-drive</span>
+    </div>
+    <div class="meta">
+      <h3>B · Zipline — a ponte em movimento</h3>
+      <p>O cabo que liga dois pontos e te carrega entre eles: junta <strong>ponte + transporte</strong> numa palavra só. Visual fortíssimo para a barra de progresso (o arquivo descendo a linha). <strong>Riscos:</strong> <code>zipline</code> está tomado no npm; existe uma empresa grande de drones com esse nome; e "zip" pode sugerir arquivo .zip.</p>
+      <div class="fn">Fortnite: ziplines entraram na Temporada 7 (dez/2018), no bioma de neve.</div>
+    </div>
+  </div>
+
+  <!-- C · SIPHON -->
+  <div class="card name" data-choice="siphon" onclick="toggleSelect(this)">
+    <div class="board">
+      <div class="wm">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+          <rect x="4" y="14" width="14" height="22" rx="2.5" stroke="#F4F7FA" stroke-width="2.2"/>
+          <rect x="26" y="20" width="14" height="16" rx="2.5" stroke="#F4F7FA" stroke-width="2.2"/>
+          <path d="M11 22V9c0-1.5 1.2-2.5 2.5-2.5h17C32 6.5 33 7.5 33 9v8" stroke="#1FA39E" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M33 20.5c-1.6 2.2-2.4 3.4-2.4 4.4a2.4 2.4 0 0 0 4.8 0c0-1-.8-2.2-2.4-4.4z" fill="#1FA39E"/>
+          <rect x="6.5" y="26" width="9" height="7.5" rx="1" fill="#1FA39E" opacity=".35"/>
+        </svg>
+        <b>Siphon</b>
+      </div>
+      <div class="tag">Transfere o conteúdo de um Drive para o outro.<br><span style="opacity:.6">Sem apagar nada na origem. Nunca.</span></div>
+      <span class="cmd">npx drivesiphon</span>
+    </div>
+    <div class="meta">
+      <h3>C · Siphon — o sifão</h3>
+      <p>No jogo é a mecânica que te enche de vida e escudo ao eliminar alguém. Fora dele, sifão é <strong>literalmente passar o conteúdo de um recipiente para outro por um tubo</strong> — a metáfora mais exata de todas para "copiar de um Drive para outro". Palavra adulta, sóbria. <strong>Risco:</strong> em inglês "siphon" também significa <em>desviar</em> (dinheiro, recursos) — tem uma leve sombra; e <code>siphon</code> puro está tomado.</p>
+      <div class="fn">Fortnite: Siphon surgiu no fim da Temporada 7 e ficou nos modos competitivos (Arena).</div>
+    </div>
+  </div>
+
+  <!-- D · SLIPSTREAM -->
+  <div class="card name" data-choice="slipstream" onclick="toggleSelect(this)">
+    <div class="board">
+      <div class="wm">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+          <path d="M4 15c9 0 13 4 22 4s9-4 14-4" stroke="#1FA39E" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
+          <path d="M4 22c9 0 13 4 22 4s9-4 14-4" stroke="#1FA39E" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M4 29c9 0 13 4 22 4s9-4 14-4" stroke="#1FA39E" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
+          <circle cx="24" cy="25.5" r="3.4" fill="#F4F7FA"/>
+        </svg>
+        <b>Slipstream</b>
+      </div>
+      <div class="tag">O caminho rápido entre dois Drives.<br><span style="opacity:.6">Entra de um lado, sai do outro. Em fila, com retomada.</span></div>
+      <span class="cmd warn">npx slipstream — tomado · usar slipstream-drive</span>
+    </div>
+    <div class="meta">
+      <h3>D · Slipstream — o túnel de vento</h3>
+      <p>Os túneis de vento que levavam o jogador em alta velocidade pelo mapa. Também é termo real de aerodinâmica (vácuo atrás de um veículo). Soa <strong>rápido, limpo e técnico</strong>; o mais "produto de software" dos quatro. <strong>Riscos:</strong> longo para um wordmark; <code>slipstream</code> tomado no npm; e a metáfora de "velocidade" promete demais na cópia entre contas, que passa pela máquina.</p>
+      <div class="fn">Fortnite: Slipstreams foram da Temporada 9 (mai/2019), ao redor de Neo Tilted e Mega Mall.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="extra">
+  <strong style="color:var(--text-primary)">Outros termos que pesquisei — melhores como nomes de <em>recursos</em> do que como marca:</strong><br>
+  <code>Supply Drop</code> (a caixa que cai do céu com loot · <code>npx supplydrop</code> livre) → bom nome para "cópia concluída: chegou no seu Drive".
+  <code>Reboot Van</code> (traz o colega de volta) → "Verificar novidades" / re-sync.
+  <code>Battle Bus</code> (leva todo mundo pro mapa) → a fila de jobs.
+  <code>Storm</code> (a tempestade fechando) → o orçamento diário acabando.
+  <code>Launch Pad</code>, <code>Grappler</code>, <code>Port-a-Fort</code> → fracos como marca.
+</div>
+
+<p class="subtitle" style="margin-top:22px">
+  <span class="pick">Minha recomendação</span> &nbsp;<strong>Rift</strong>. É a única cuja metáfora descreve a <em>vantagem técnica</em> do produto (o arquivo não viaja — aparece), e não só "ir de A a B". Curto, sério, dá um logotipo bom. Comando <code>npx riftdrive</code>. Segunda opção: <strong>Siphon</strong>, pela precisão da metáfora.
+</p>

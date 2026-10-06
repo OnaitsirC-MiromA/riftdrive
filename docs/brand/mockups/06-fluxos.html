@@ -1,0 +1,170 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+  .lay { border-radius: 14px; overflow: hidden; border: 2px solid transparent; cursor: pointer; background: var(--bg-secondary); margin-top: 18px; transition: border-color .15s; }
+  .lay.selected { border-color: var(--selected-border); }
+  .lay.static { cursor: default; }
+  .lay .head { padding: 16px 20px 10px; }
+  .lay .head h3 { margin: 0 0 4px; font-size: 16px; }
+  .lay .head p { margin: 0; font-size: 13px; color: var(--text-secondary); max-width: 640px; line-height: 1.5; }
+  .lay .foot { padding: 10px 20px 16px; font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+  .lay .foot strong { color: var(--text-primary); font-weight: 600; }
+  .scr { margin: 0 20px; background: #0B1020; color: #F5F3FF; font-family: 'DM Sans', system-ui, sans-serif; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,.08); font-size: 12px; }
+  .scr * { box-sizing: border-box; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; }
+  .mut { color: rgba(245,243,255,.58); }
+  .vio { color: #C4B5FD; }
+  .amb { color: #F2B134; }
+  .chip { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; }
+  .chip.rift { background: rgba(167,139,250,.18); color: #C4B5FD; }
+  .chip.maq { background: rgba(242,177,52,.16); color: #F2B134; }
+  .chip.ok { background: rgba(52,211,153,.16); color: #6EE7B7; }
+  .chip.pause { background: rgba(255,255,255,.08); color: rgba(245,243,255,.7); }
+  .bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg,#67E8F9,#A78BFA); }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 7px; font-weight: 600; font-size: 12px; background: #A78BFA; color: #0B1020; }
+  .btn.ghost { background: rgba(255,255,255,.07); color: #F5F3FF; font-weight: 500; }
+  .btn.sm { padding: 5px 9px; font-size: 11px; }
+  .inp { background: #141A33; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 10px 12px; color: rgba(245,243,255,.45); }
+  .inp.filled { color: #F5F3FF; }
+  .sel { background: #141A33; border: 1px solid rgba(255,255,255,.1); border-radius: 7px; padding: 7px 10px; color: #F5F3FF; display: inline-flex; gap: 8px; align-items: center; }
+  .card2 { background: #141A33; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
+  .kv { display: grid; grid-template-columns: 92px 1fr; gap: 6px 12px; align-items: baseline; }
+  .kv .k { color: rgba(245,243,255,.5); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .note { border-left: 2px solid #A78BFA; padding: 8px 12px; background: rgba(167,139,250,.08); border-radius: 0 8px 8px 0; line-height: 1.5; }
+  .note.amb { border-color: #F2B134; background: rgba(242,177,52,.08); color: #F5F3FF; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 14px; letter-spacing: -0.02em; }
+  .steps { display: grid; gap: 0; }
+  .step { display: grid; grid-template-columns: 24px 1fr; gap: 12px; padding: 10px 0; }
+  .step .n { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.08); color: rgba(245,243,255,.7); }
+  .step .n.done { background: rgba(52,211,153,.18); color: #6EE7B7; }
+  .step .n.cur { background: #A78BFA; color: #0B1020; }
+  .step .b { display: grid; gap: 6px; }
+  .step .b b { font-weight: 600; }
+  .radio { display: grid; grid-template-columns: 16px 1fr; gap: 10px; padding: 11px 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 9px; align-items: start; }
+  .radio.on { border-color: rgba(167,139,250,.6); background: rgba(167,139,250,.07); }
+  .radio .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); margin-top: 1px; }
+  .radio.on .dot { border-color: #A78BFA; background: radial-gradient(circle, #A78BFA 45%, transparent 50%); }
+  .pick { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-tertiary); }
+  h2.sec { margin-top: 42px; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="rift" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67E8F9"/><stop offset=".5" stop-color="#A78BFA"/><stop offset="1" stop-color="#C084FC"/></linearGradient>
+    <symbol id="mB" viewBox="0 0 48 48">
+      <rect x="18" y="10" width="12" height="28" rx="6" fill="url(#rift)" opacity=".45"/>
+      <rect x="14" y="6" width="20" height="36" rx="10" stroke="url(#rift)" stroke-width="2.4" fill="none"/>
+      <path d="M4 24h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" opacity=".4"/>
+      <path d="M30 24h12M37.5 19.5 42 24l-4.5 4.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<h2>Nova cópia — o coração do app</h2>
+<p class="subtitle">Duas formas de levar o usuário do link até a cópia andando. Nas duas, a <strong>análise</strong> é o momento-chave: é onde o app diz que caminho vai usar e por quê. Clique na que prefere.</p>
+
+<!-- ============ A · INLINE ============ -->
+<div class="card lay" data-choice="fluxo-a-inline" onclick="toggleSelect(this)">
+  <div class="head"><h3>A · Inline — a análise abre embaixo da caixa</h3><p>Sem modal, sem passos. Colou o link, a tela principal se expande com o que o app descobriu; destino e nome já vêm preenchidos; um botão inicia. Mostrado aqui no caso em que a pasta <em>não</em> está compartilhada com a conta de destino — o caso que precisa de explicação.</p></div>
+  <div class="scr">
+    <div class="topbar"><div class="brand"><svg width="22" height="22" style="color:#F5F3FF"><use href="#mB"/></svg>Rift<span style="font-weight:400;opacity:.7">Drive</span></div><div style="display:flex;gap:10px;align-items:center" class="mut"><span class="chip pause">cristiano@… ▾</span><span>⚙</span></div></div>
+    <div style="padding:24px 18px 22px;display:grid;gap:12px;max-width:640px;margin:0 auto">
+      <div style="font-size:17px;font-weight:600;letter-spacing:-0.02em">O que vamos copiar hoje?</div>
+      <div style="display:flex;gap:8px"><div class="inp filled mono" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">https://drive.google.com/drive/folders/1xK9…aQ2</div><span class="btn ghost">Limpar</span></div>
+
+      <div class="card2">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><b style="font-size:14px;font-weight:600">Asimov 2026</b><span class="mut mono">312 arquivos · 48,2 GB · de ana.ribeiro@…</span></div>
+        <div class="kv">
+          <span class="k">Caminho</span>
+          <div style="display:grid;gap:8px">
+            <div><span class="chip maq">pela sua máquina</span> <span class="mut">· ~1h15 a 11 MB/s · precisa deixar o app aberto</span></div>
+            <div class="note amb">Essa pasta <b>não está compartilhada</b> com <b>cristiano@…</b>, então os arquivos vão baixar e subir pela sua máquina.<br><span class="mut">Se o dono compartilhar a pasta com você, a cópia acontece dentro do Google — instantânea e sem usar sua internet.</span> <span class="vio">Copiar pedido para enviar ao dono</span></div>
+          </div>
+          <span class="k">Bloqueados</span><div><span class="amb">3 arquivos</span> <span class="mut">o dono desativou cópia/download · ficarão de fora · copiável: 47,1 GB</span> <span class="vio">ver quais</span></div>
+          <span class="k">Destino</span><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="sel">cristiano@… ▾</span><span class="sel">Meu Drive / Cursos ▾</span><span class="sel" style="color:rgba(245,243,255,.8)">nome: Asimov 2026 ✎</span></div>
+          <span class="k">Cota</span><div class="mut">Cabe na cota de hoje · <b style="color:#F5F3FF;font-weight:500">288 GB</b> restantes, renova às 04:00</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:4px"><span class="btn ghost">Cancelar</span><span class="btn">Iniciar cópia →</span></div>
+      </div>
+
+      <div class="mut" style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;margin-top:6px">Em andamento · 1</div>
+      <div class="card2" style="padding:12px 14px;gap:8px"><div style="display:flex;justify-content:space-between"><b style="font-weight:600">Mentoria Full Stack</b><span class="chip rift">pelo rift</span></div><div class="bar"><i style="width:63%"></i></div></div>
+    </div>
+  </div>
+  <div class="foot"><strong>A favor:</strong> um só lugar, zero troca de contexto; o usuário vê a lista de cópias enquanto decide; voltar atrás é apagar o link. <strong>Contra:</strong> a análise empurra a lista para baixo enquanto está aberta.</div>
+</div>
+
+<!-- ============ B · STEPPER ============ -->
+<div class="card lay" data-choice="fluxo-b-passos" onclick="toggleSelect(this)">
+  <div class="head"><h3>B · Em passos — um diálogo com 3 etapas</h3><p>Origem → Caminho e destino → Confirmar. O mesmo conteúdo, dividido. Mostrado aqui no caso feliz ("pelo rift").</p></div>
+  <div class="scr" style="position:relative;min-height:330px">
+    <div class="topbar" style="opacity:.35"><div class="brand"><svg width="22" height="22" style="color:#F5F3FF"><use href="#mB"/></svg>Rift<span style="font-weight:400;opacity:.7">Drive</span></div><span class="chip pause">cristiano@… ▾</span></div>
+    <div style="position:absolute;inset:0;background:rgba(5,8,20,.55);display:grid;place-items:center;padding:20px">
+      <div class="card2" style="width:100%;max-width:520px;gap:14px;background:#111733">
+        <div style="display:flex;gap:18px" class="mut"><span><span class="chip ok" style="margin-right:6px">✓</span>1 Origem</span><span style="color:#F5F3FF;font-weight:600"><span class="chip" style="background:#A78BFA;color:#0B1020;margin-right:6px">2</span>Caminho e destino</span><span><span class="chip pause" style="margin-right:6px">3</span>Confirmar</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:14px;font-weight:600">Asimov 2026</b><span class="mut mono">312 arquivos · 48,2 GB</span></div>
+        <div class="note"><span class="chip rift" style="margin-right:6px">pelo rift</span> Essa pasta está compartilhada com <b>cristiano@…</b>: a cópia acontece dentro do Google, sem passar pela sua máquina. <span class="mut">Pode fechar o app no meio — ela continua.</span></div>
+        <div class="kv"><span class="k">Destino</span><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="sel">cristiano@… ▾</span><span class="sel">Meu Drive / Cursos ▾</span></div><span class="k">Nome</span><div class="inp filled" style="padding:7px 10px">Asimov 2026</div></div>
+        <div style="display:flex;justify-content:space-between;padding-top:2px"><span class="btn ghost">← Voltar</span><span class="btn">Continuar →</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><strong>A favor:</strong> foco total, um assunto por vez; familiar. <strong>Contra:</strong> três cliques para algo que cabe numa tela; o diálogo esconde a lista; "Confirmar" repete o que o passo 2 já mostrou.</div>
+</div>
+
+<p class="subtitle" style="margin-top:18px"><span class="pick">Minha recomendação</span> &nbsp;<strong>A (inline)</strong>. É a consequência natural do layout "ação primeiro": a tela principal <em>é</em> o fluxo.</p>
+
+<!-- ============ PRIMEIRA VEZ ============ -->
+<h2 class="sec">Primeira vez — criar o acesso ao Google</h2>
+<p class="subtitle">O único atrito do produto, então merece a melhor tela. Uma proposta só; me diga o que mudar. Cada passo tem o link direto para a página certa do Google Cloud e um "feito" que o usuário marca — o app lembra onde parou.</p>
+
+<div class="card lay static">
+  <div class="scr">
+    <div class="topbar"><div class="brand"><svg width="22" height="22" style="color:#F5F3FF"><use href="#mB"/></svg>Rift<span style="font-weight:400;opacity:.7">Drive</span></div><span class="mut">Configuração inicial · 1 de 2</span></div>
+    <div style="padding:26px 18px 24px;display:grid;gap:14px;max-width:600px;margin:0 auto">
+      <div style="font-size:18px;font-weight:600;letter-spacing:-0.02em">Antes de tudo: seu acesso ao Google</div>
+      <p class="mut" style="margin:0;line-height:1.55">O RiftDrive não tem servidor nem conta própria — ele fala com o Google <b style="color:#F5F3FF;font-weight:500">em seu nome</b>, com uma credencial que só você tem. Por isso o Google pede que cada pessoa crie a sua. Leva uns 8 minutos, uma única vez. Nenhum dado seu passa por terceiros.</p>
+      <div class="steps">
+        <div class="step"><span class="n done">✓</span><div class="b"><b>Criar um projeto no Google Cloud</b><span class="mut">Pode chamar de "RiftDrive". <span class="vio">Abrir console ↗</span></span></div></div>
+        <div class="step"><span class="n done">✓</span><div class="b"><b>Ativar a Google Drive API</b><span class="mut"><span class="vio">Abrir direto na página da API ↗</span> · clique em "Ativar"</span></div></div>
+        <div class="step"><span class="n cur">3</span><div class="b"><b>Tela de consentimento: tipo "Externo" e <span class="amb">publicar em produção</span></b>
+          <div class="note amb" style="font-size:11px">Esse é o passo que todo mundo pula. Se o app ficar em "Teste", o Google <b>desconecta sua conta a cada 7 dias</b>. Em "Produção" a conexão dura — o Google só mostra um aviso de "app não verificado" na primeira vez, que é esperado. <span class="vio">Abrir tela de consentimento ↗</span></div>
+          <span class="btn sm ghost" style="justify-self:start">Feito, publiquei</span></div></div>
+        <div class="step"><span class="n">4</span><div class="b"><b class="mut">Criar credencial: ID do cliente OAuth, tipo "App para computador"</b></div></div>
+        <div class="step"><span class="n">5</span><div class="b"><b class="mut">Colar aqui o ID e o segredo do cliente</b><div style="display:grid;gap:6px;opacity:.45"><div class="inp">ID do cliente (termina em .apps.googleusercontent.com)</div><div class="inp">Segredo do cliente</div></div></div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px"><span class="mut" style="font-size:11px">Já tem um client? <span class="vio">Pular para colar</span></span><span class="btn" style="opacity:.4">Validar e entrar com Google →</span></div>
+    </div>
+  </div>
+  <div class="foot">Depois do passo 5: o app valida o formato, abre o navegador no consentimento do Google e recebe o retorno numa porta local — sem colar URL de volta. Ao conectar, mostra "<strong>cristiano@… conectado</strong> — esta conta será o destino padrão" e oferece <strong>Conectar outra conta</strong> (para o caso A → B). Isso é a etapa 2 de 2.</div>
+</div>
+
+<!-- ============ CONFIGURAÇÕES · COTA ============ -->
+<h2 class="sec">Configurações — cota diária</h2>
+<p class="subtitle">Com o seu ajuste: a palavra é <strong>cota</strong>, e existe a opção de não limitar. Uma proposta só.</p>
+
+<div class="card lay static">
+  <div class="scr">
+    <div class="topbar"><div class="brand"><svg width="22" height="22" style="color:#F5F3FF"><use href="#mB"/></svg>Rift<span style="font-weight:400;opacity:.7">Drive</span></div><span class="mut">Configurações</span></div>
+    <div style="padding:22px 18px;display:grid;gap:20px;max-width:600px;margin:0 auto">
+      <div style="display:grid;gap:10px">
+        <div><b style="font-size:14px;font-weight:600">Cota diária</b><p class="mut" style="margin:4px 0 0;line-height:1.5">O Google limita quanto cada conta pode receber por dia (na prática, ~750 GB). O RiftDrive pode parar antes disso, por segurança, ou ir até o Google cortar.</p></div>
+        <div class="radio on"><span class="dot"></span><div style="display:grid;gap:6px"><b>Limitar a <span class="sel" style="padding:2px 8px;margin:0 2px">600</span> GB por dia · renova às <span class="sel" style="padding:2px 8px;margin:0 2px">04:00</span></b><span class="mut">Quando a cota do dia acaba, as cópias pausam e <b style="color:#F5F3FF;font-weight:500">retomam sozinhas</b> na renovação. Nunca bate no teto do Google.</span></div></div>
+        <div class="radio"><span class="dot"></span><div style="display:grid;gap:6px"><b>Sem limite</b><span class="mut">Copia até o Google cortar. Quando cortar, o RiftDrive pausa a cópia, mostra o aviso e <b style="color:#F5F3FF;font-weight:500">tenta de novo a cada hora</b> até liberar. Útil quando você sabe que o volume é menor que o teto — ou quando quer ir até o fim e aceitar a pausa.</span></div></div>
+      </div>
+      <div style="display:grid;gap:10px">
+        <b style="font-size:14px;font-weight:600">Contas do Google</b>
+        <div class="card2" style="padding:10px 14px;gap:6px"><div style="display:flex;justify-content:space-between;align-items:center"><span><b style="font-weight:500">cristiano@…</b> <span class="chip ok" style="margin-left:6px">conectada</span> <span class="mut" style="margin-left:6px">destino padrão</span></span><span class="vio">Testar · Reconectar</span></div></div>
+        <div class="card2" style="padding:10px 14px;gap:6px"><div style="display:flex;justify-content:space-between;align-items:center"><span><b style="font-weight:500">antiga@…</b> <span class="chip ok" style="margin-left:6px">conectada</span></span><span class="vio">Remover</span></div></div>
+        <span class="btn ghost sm" style="justify-self:start">+ Conectar outra conta</span>
+      </div>
+      <div style="display:grid;gap:8px">
+        <b style="font-size:14px;font-weight:600">Cópia</b>
+        <div class="kv"><span class="k">Destino padrão</span><span class="sel" style="justify-self:start">Meu Drive / Cursos ▾</span><span class="k">Bloqueados</span><span class="mut">Pular e listar no fim (recomendado) ▾</span><span class="k">Ritmo</span><span class="mut">Normal — o app ajusta sozinho quando o Google pede calma ▾</span></div>
+      </div>
+    </div>
+  </div>
+</div>
