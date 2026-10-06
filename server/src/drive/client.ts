@@ -139,22 +139,27 @@ export class DriveClient {
     return normalize((await res.json()) as Record<string, unknown>);
   }
 
-  async listChildren(parentId: string): Promise<DriveFile[]> {
+  // files.list com uma consulta `q`, todas as páginas.
+  private async listQuery(q: string): Promise<DriveFile[]> {
     const out: DriveFile[] = [];
     let pageToken: string | undefined;
     do {
-      const query: Record<string, string> = {
-        q: `'${parentId}' in parents and trashed = false`,
-        fields: `nextPageToken,files(${FILE_FIELDS})`,
-        pageSize: '1000',
-        includeItemsFromAllDrives: 'true',
-      };
+      const query: Record<string, string> = { q, fields: `nextPageToken,files(${FILE_FIELDS})`, pageSize: '1000', includeItemsFromAllDrives: 'true' };
       if (pageToken) query.pageToken = pageToken;
       const json = (await (await this.request('/drive/v3/files', { query })).json()) as { files?: Record<string, unknown>[]; nextPageToken?: string };
       out.push(...(json.files ?? []).map(normalize));
       pageToken = json.nextPageToken;
     } while (pageToken);
     return out;
+  }
+
+  listChildren(parentId: string): Promise<DriveFile[]> {
+    return this.listQuery(`'${parentId}' in parents and trashed = false`);
+  }
+
+  // As pastas que o usuário marcou com estrela no Drive, estejam onde estiverem.
+  listStarredFolders(): Promise<DriveFile[]> {
+    return this.listQuery(`starred = true and mimeType = '${FOLDER_MIME}' and trashed = false`);
   }
 
   // Cópia servidor-a-servidor: o "rift". Os bytes nunca saem do Google.

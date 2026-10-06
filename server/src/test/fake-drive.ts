@@ -34,6 +34,7 @@ export interface FakeNode {
   readers: Set<string>;
   trashed: boolean;
   modifiedTime: string;
+  starred: boolean;
 }
 
 interface Session {
@@ -124,9 +125,15 @@ export class FakeDrive {
       readers: new Set(n.readers ?? []),
       trashed: false,
       modifiedTime: '2026-01-01T00:00:00.000Z',
+      starred: false,
     };
     this.nodes.set(node.id, node);
     return node;
+  }
+
+  /** Marca com estrela (o usuário fez isso no Drive). */
+  star(nodeId: string): void {
+    this.nodes.get(nodeId)!.starred = true;
   }
 
   addFolder(p: { id?: string; name: string; parentId: string; owner: string; readers?: string[] }): FakeNode {
@@ -254,8 +261,12 @@ export class FakeDrive {
     if (path === '/drive/v3/about') return json({ user: { emailAddress: acc.email } });
 
     if (path === '/drive/v3/files' && method === 'GET') {
-      const parent = resolve(u.searchParams.get('q')?.match(/'([^']+)' in parents/)?.[1]) ?? '';
-      const kids = this.children(parent).filter((n) => this.canRead(n, acc.id));
+      const q = u.searchParams.get('q') ?? '';
+      const parent = resolve(q.match(/'([^']+)' in parents/)?.[1]);
+      const mime = q.match(/mimeType = '([^']+)'/)?.[1];
+      // Dois tipos de consulta: filhos de uma pasta, ou "tudo com estrela".
+      let kids = parent !== undefined ? this.children(parent) : /starred = true/.test(q) ? [...this.nodes.values()].filter((n) => n.starred && !n.trashed) : [];
+      kids = kids.filter((n) => this.canRead(n, acc.id) && (!mime || n.mimeType === mime)).sort((a, b) => a.name.localeCompare(b.name));
       const size = Number(u.searchParams.get('pageSize') ?? 100);
       const off = Number(u.searchParams.get('pageToken') ?? 0);
       const page = kids.slice(off, off + size);

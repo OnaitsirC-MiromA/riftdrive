@@ -39,13 +39,15 @@ export async function inspectRoutes(app: FastifyInstance, opts: { deps: AppDeps 
     }
   });
 
-  // Navegador de pastas do destino.
+  // Navegador de pastas do destino. `parentId=starred` é o pai especial: as
+  // pastas com estrela da conta, estejam onde estiverem.
   app.get<{ Querystring: { accountId?: string; parentId?: string } }>('/api/drive/folders', async (req, reply) => {
     const acc = (req.query.accountId ? accountsRepo.get(req.query.accountId) : null) ?? (req.query.accountId ? null : accountsRepo.defaultDest());
     if (!acc) return reply.code(404).send({ error: t.accounts.notFound });
     const parentId = req.query.parentId || 'root';
     try {
-      const kids = await clientFor(acc.id).listChildren(parentId);
+      const client = clientFor(acc.id);
+      const kids = parentId === 'starred' ? await client.listStarredFolders() : await client.listChildren(parentId);
       const folders = kids
         .filter((k) => k.mimeType === FOLDER_MIME)
         .sort((a, b) => a.name.localeCompare(b.name))

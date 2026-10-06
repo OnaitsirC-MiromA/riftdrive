@@ -55,4 +55,19 @@ describe('GET /api/drive/folders', () => {
     expect(r.json().folders.map((f: { name: string }) => f.name)).toEqual(['Alfa', 'Zeta']);
     expect((await w.app.inject({ url: '/api/drive/folders?accountId=nope&parentId=root' })).statusCode).toBe(404);
   });
+
+  it('parentId=starred lista só as pastas com estrela da conta, de qualquer lugar', async () => {
+    const w = world();
+    const root = w.fake.rootOf('dest');
+    const sub = w.fake.addFolder({ name: 'Projetos', parentId: root, owner: 'dest@x.com' });
+    const deep = w.fake.addFolder({ name: 'Cursos 2026', parentId: sub.id, owner: 'dest@x.com' });
+    w.fake.addFolder({ name: 'Sem estrela', parentId: root, owner: 'dest@x.com' });
+    w.fake.addFile({ name: 'favorito.pdf', parentId: root, owner: 'dest@x.com' });
+    w.fake.star(deep.id);
+    w.fake.star(sub.id);
+    w.fake.star(w.fake.children(root).find((n) => n.name === 'favorito.pdf')!.id);
+    const r = await w.app.inject({ url: `/api/drive/folders?accountId=${w.dest.id}&parentId=starred` });
+    expect(r.statusCode).toBe(200);
+    expect(r.json().folders.map((f: { name: string }) => f.name)).toEqual(['Cursos 2026', 'Projetos']);
+  });
 });

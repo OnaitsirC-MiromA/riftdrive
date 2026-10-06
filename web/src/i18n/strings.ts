@@ -193,6 +193,7 @@ export const s = {
     yes: 'Sim',
     no: 'Não',
     myDrive: 'Meu Drive',
+    starred: 'Com estrela',
     choose: 'Escolher',
     change: 'trocar',
     here: 'aqui',
