@@ -9,6 +9,12 @@ name: Release
 #   2. em npmjs.com → pacote → Settings → Trusted Publisher: GitHub Actions,
 #      owner OnaitsirC-MiromA, repo riftdrive, workflow release.yml, environment
 #      em branco. Os campos são comparados letra a letra, maiúsculas incluídas.
+#
+# Situação em 2026-10-07: este repositório nasceu depois de 15/07/2026, então o
+# GitHub emite o token OIDC com o `sub` imutável (repo:dono@id/repo@id:…) e o
+# registro do npm ainda não o aceita — responde "package not found"
+# (npm/cli#9969). Enquanto durar, o job conferir-npm falha, a release no GitHub
+# sai normalmente e o npm fica de fora para o dono publicar à mão.
 on:
   push:
     tags: ['v*']
@@ -27,9 +33,15 @@ jobs:
   # diferente das afirmações impressas abaixo.
   conferir-npm:
     runs-on: ubuntu-latest
+    outputs:
+      ok: ${{ steps.troca.outcome == 'success' }}
     steps:
       - uses: actions/checkout@v4
       - name: Trocar o OIDC do Actions pela credencial do npm
+        id: troca
+        # A recusa não pode segurar a release no GitHub: vira aviso aqui e o job
+        # publicar decide o que fazer com o npm.
+        continue-on-error: true
         run: |
           nome=$(jq -r .name package.json)
           id_token=$(curl -fsS -H "Accept: application/json" \
@@ -45,7 +57,7 @@ jobs:
             -H "Authorization: Bearer $id_token" \
             "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/$nome")
           if [ "$codigo" != "200" ]; then
-            echo "::error::npm recusou o OIDC (HTTP $codigo): $(cat resposta.json)"
+            echo "::warning::npm recusou o OIDC (HTTP $codigo): $(cat resposta.json)"
             exit 1
           fi
           # A resposta é uma credencial de publicação de curta duração: não mostrar.
@@ -148,5 +160,13 @@ jobs:
       # Sem NODE_AUTH_TOKEN de propósito: o npm detecta o OIDC do Actions e troca
       # por uma credencial de curta duração. A proveniência sai junto.
       - name: Publicar no npm
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && needs.conferir-npm.outputs.ok == 'true'
         run: npm publish --provenance --access public
+
+      # A release no GitHub já está no ar a esta altura; só o npm ficou de fora.
+      # Falhar aqui é de propósito: o X vermelho avisa que falta publicar à mão.
+      - name: npm ficou de fora
+        if: startsWith(github.ref, 'refs/tags/') && needs.conferir-npm.outputs.ok != 'true'
+        run: |
+          echo "::error::O npm recusou o OIDC (veja o job conferir-npm). A release no GitHub saiu; publique no npm à mão, num terminal interativo: git checkout ${GITHUB_REF_NAME} && npm ci && npm run build && npm publish --access public"
+          exit 1
