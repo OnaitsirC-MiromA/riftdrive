@@ -149,3 +149,77 @@ describe('POST /api/drive/folders', () => {
   });
 });
 
+describe('POST /api/inspect reaproveitando uma inspeção', () => {
+  it('mesma conta de destino: troca só o destino, mantém o id e não relê a árvore', async () => {
+    const w = world();
+    w.fake.share(w.src.id, 'dest');
+    const first = (await w.app.inject({ method: 'POST', url: '/api/inspect', payload: { link: w.link } })).json();
+    expect(first.totals.files).toBe(2);
+    // A origem cresce depois da primeira leitura: reaproveitar é não enxergar o novo.
+    w.fake.addFile({ name: 'c.mp4', parentId: w.src.id, owner: 'ana@x.com', content: '1' });
+    const root = w.fake.rootOf('dest');
+    const projetos = w.fake.addFolder({ name: 'Projetos', parentId: root, owner: 'dest@x.com' });
+    const existente = w.fake.addFolder({ name: 'Curso', parentId: projetos.id, owner: 'dest@x.com' });
+    const r = await w.app.inject({
+      method: 'POST',
+      url: '/api/inspect',
+      payload: { link: w.link, inspectionId: first.inspectionId, destAccountId: w.dest.id, destParentId: projetos.id, destParentName: 'Projetos' },
+    });
+    expect(r.statusCode).toBe(200);
+    const b = r.json();
+    expect(b.inspectionId).toBe(first.inspectionId);
+    expect(b).toMatchObject({ destParentId: projetos.id, destParentName: 'Projetos', totals: { files: 2 }, destConflict: { existingFolderId: existente.id } });
+    expect(w.deps.inspections.get(first.inspectionId)?.result.destConflict).toEqual({ existingFolderId: existente.id });
+  });
+
+  it('outra conta de destino: relê a árvore e devolve um id novo', async () => {
+    const w = world();
+    const b = connectFakeAccount(w.deps, w.fake, 'b', 'b@x.com');
+    w.fake.share(w.src.id, 'dest');
+    w.fake.share(w.src.id, 'b');
+    const first = (await w.app.inject({ method: 'POST', url: '/api/inspect', payload: { link: w.link } })).json();
+    w.fake.addFile({ name: 'c.mp4', parentId: w.src.id, owner: 'ana@x.com', content: '1' });
+    const r = (
+      await w.app.inject({
+        method: 'POST',
+        url: '/api/inspect',
+        payload: { link: w.link, inspectionId: first.inspectionId, destAccountId: b.id, destParentId: 'root', destParentName: 'Meu Drive' },
+      })
+    ).json();
+    expect(r.inspectionId).not.toBe(first.inspectionId);
+    expect(r).toMatchObject({ destEmail: 'b@x.com', totals: { files: 3 } });
+  });
+
+  it('inspeção desconhecida ou expirada cai na análise completa', async () => {
+    const w = world();
+    w.fake.share(w.src.id, 'dest');
+    const r = await w.app.inject({
+      method: 'POST',
+      url: '/api/inspect',
+      payload: { link: w.link, inspectionId: 'sumiu', destAccountId: w.dest.id, destParentId: 'root', destParentName: 'Meu Drive' },
+    });
+    expect(r.statusCode).toBe(200);
+    expect(r.json()).toMatchObject({ totals: { files: 2 } });
+    expect(typeof r.json().inspectionId).toBe('string');
+  });
+});
+
+describe('GET /api/inspect/progress', () => {
+  it('token desconhecido é 404; ao terminar a análise o token some', async () => {
+    const w = world();
+    w.fake.share(w.src.id, 'dest');
+    expect((await w.app.inject({ url: '/api/inspect/progress?token=nada' })).statusCode).toBe(404);
+    const r = await w.app.inject({ method: 'POST', url: '/api/inspect', payload: { link: w.link, progressToken: 'abc' } });
+    expect(r.statusCode).toBe(200);
+    expect((await w.app.inject({ url: '/api/inspect/progress?token=abc' })).statusCode).toBe(404);
+  });
+
+  it('enquanto a leitura corre, o token diz quantos arquivos já viu', async () => {
+    const w = world();
+    w.deps.inspectProgress.set('t1', 37);
+    const r = await w.app.inject({ url: '/api/inspect/progress?token=t1' });
+    expect(r.statusCode).toBe(200);
+    expect(r.json()).toEqual({ filesSeen: 37 });
+  });
+});
+

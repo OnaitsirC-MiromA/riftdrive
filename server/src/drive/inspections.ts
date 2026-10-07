@@ -28,8 +28,47 @@ export class InspectionCache {
     return it ? { result: it.result, tree: it.tree } : null;
   }
 
+  // Só o destino mudou: o resultado é outro, a árvore e o id continuam os mesmos,
+  // então a SPA não precisa remontar nada nem o job perder a leitura.
+  update(id: string, result: InspectResult): boolean {
+    const it = this.items.get(id);
+    if (!it) return false;
+    it.result = result;
+    return true;
+  }
+
   private sweep(): void {
     const cut = this.now() - this.ttlMs;
     for (const [k, v] of this.items) if (v.at < cut) this.items.delete(k);
+  }
+}
+
+// Quantos arquivos a leitura em curso já viu, por token que a SPA inventou.
+// O POST /api/inspect alimenta; a SPA consulta enquanto espera; ao terminar,
+// o token some. Tokens esquecidos morrem pelo TTL.
+export class InspectProgress {
+  private items = new Map<string, { filesSeen: number; at: number }>();
+
+  constructor(
+    private ttlMs = 15 * 60_000,
+    private now: () => number = Date.now,
+  ) {}
+
+  set(token: string, filesSeen: number): void {
+    this.items.set(token, { filesSeen, at: this.now() });
+  }
+
+  get(token: string): number | null {
+    const it = this.items.get(token);
+    if (!it) return null;
+    if (it.at < this.now() - this.ttlMs) {
+      this.items.delete(token);
+      return null;
+    }
+    return it.filesSeen;
+  }
+
+  clear(token: string): void {
+    this.items.delete(token);
   }
 }

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import { api, ApiError, type Inspection } from '../api/client';
-import { useAccounts, useInfo, useJobs } from '../api/hooks';
+import { useAccounts, useInfo, useInspectProgress, useJobs } from '../api/hooks';
 import { Shell } from '../components/Shell';
 import { Button } from '../components/Button';
 import { Banner } from '../components/Banner';
@@ -20,6 +20,9 @@ interface PickedSource extends PickedFolder {
 
 type DestOverride = { destAccountId: string; destParentId: string; destParentName: string };
 
+// Token para acompanhar a leitura; fora de contexto seguro (acesso por IP) não há randomUUID.
+const newToken = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2));
+
 export default function Home() {
   const info = useInfo();
   const { data: accounts = [] } = useAccounts();
@@ -29,8 +32,14 @@ export default function Home() {
   const [browsing, setBrowsing] = useState(false);
   const [browseAccountId, setBrowseAccountId] = useState<string | null>(null);
   const [inspection, setInspection] = useState<Inspection | null>(null);
+  // Primeira análise: a tela mostra "Lendo a pasta…" no lugar do cartão.
   const [analyzing, setAnalyzing] = useState(false);
+  // Trocou o destino com um cartão na tela: o cartão fica, com o status ao lado.
+  const [reinspect, setReinspect] = useState<{ text: string; token: string | null } | null>(null);
+  const [progressToken, setProgressToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const progress = useInspectProgress(progressToken ?? reinspect?.token ?? null);
+  const filesSeen = progress.data ?? null;
 
   if (info.data && (!info.data.configured.client || info.data.configured.accounts === 0)) return <Navigate to="/configurar" replace />;
 
@@ -40,16 +49,29 @@ export default function Home() {
   const target = source?.id ?? link.trim();
 
   const analyze = async (what: string, dest?: DestOverride) => {
-    if (!what) return;
-    setAnalyzing(true);
+    if (!what || analyzing || reinspect) return;
+    // Com um cartão na tela e a mesma conta de destino, o servidor reaproveita a
+    // árvore e só confere o conflito: instantâneo, sem contador. Outra conta relê.
+    const previous = dest && inspection ? inspection : null;
+    const fast = Boolean(previous && dest && dest.destAccountId === previous.destAccountId);
+    const token = fast ? null : newToken();
     setError(null);
+    if (previous) {
+      const email = accounts.find((a) => a.id === dest?.destAccountId)?.email ?? '';
+      setReinspect({ text: fast ? s.analysis.checkingDest : s.analysis.rereading(email), token });
+    } else {
+      setAnalyzing(true);
+      setProgressToken(token);
+    }
     try {
-      setInspection(await api.inspect({ link: what, ...dest }));
+      setInspection(await api.inspect({ link: what, ...dest, inspectionId: previous?.inspectionId, progressToken: token ?? undefined }));
     } catch (err) {
-      setInspection(null);
+      if (!previous) setInspection(null);
       setError(err instanceof ApiError ? err.message : s.common.error);
     } finally {
       setAnalyzing(false);
+      setReinspect(null);
+      setProgressToken(null);
     }
   };
 
@@ -119,6 +141,7 @@ export default function Home() {
           <div className="flex items-center gap-3 text-muted text-[13px] card px-4 py-3" aria-live="polite">
             <PortalMark size={22} animated className="text-fg" />
             {s.home.analyzing}
+            {filesSeen !== null && <span className="num">· {s.home.filesSeen(filesSeen)}</span>}
           </div>
         )}
         {error && !analyzing && <Banner tone="error">{error}</Banner>}
@@ -130,6 +153,7 @@ export default function Home() {
             onReinspect={(dest) => void analyze(target, dest)}
             onCancel={clear}
             onStarted={clear}
+            busy={reinspect ? { text: reinspect.text, filesSeen: reinspect.token ? filesSeen : null } : null}
           />
         )}
       </section>

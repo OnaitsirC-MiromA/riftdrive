@@ -94,8 +94,7 @@ export async function inspect(deps: InspectDeps, input: InspectInput): Promise<{
   const copyableBytes = tree.totalBytes - blockedBytes;
 
   const dest = deps.accounts.find((a) => a.id === input.destAccountId)!;
-  const siblings = await deps.clientFor(dest.id).listChildren(input.destParentId);
-  const conflict = siblings.find((s) => s.mimeType === FOLDER_MIME && s.name === file.name);
+  const conflict = await findConflict(deps.clientFor(dest.id), input.destParentId, file.name);
 
   const result: InspectResult = {
     folderId: file.id,
@@ -110,9 +109,27 @@ export async function inspect(deps: InspectDeps, input: InspectInput): Promise<{
     blocked: { count: blockedFiles.length, bytes: blockedBytes, sample: blockedFiles.slice(0, 20).map((f) => ({ name: f.name, relPath: f.relPath })) },
     native: { count: nativeOut.length },
     copyableBytes,
-    destConflict: conflict ? { existingFolderId: conflict.id } : null,
+    destConflict: conflict,
     quota: deps.quota.evaluate(dest.id, copyableBytes),
     shareRequestText: path === 'machine' ? t.inspect.shareRequest(file.name, dest.email) : null,
   };
   return { result, tree };
+}
+
+// Já existe no destino uma pasta com o nome da origem? É o que decide entre
+// criar "(2)" e mesclar.
+async function findConflict(client: DriveClient, parentId: string, name: string): Promise<InspectResult['destConflict']> {
+  const siblings = await client.listChildren(parentId);
+  const hit = siblings.find((s) => s.mimeType === FOLDER_MIME && s.name === name);
+  return hit ? { existingFolderId: hit.id } : null;
+}
+
+/**
+ * Só a pasta de destino mudou, dentro da mesma conta: a árvore, o caminho, os
+ * bloqueados e a cota são os mesmos da análise guardada. Confere apenas o
+ * conflito no novo pai — uma chamada, em vez de reler a origem inteira.
+ */
+export async function reinspectDest(deps: Pick<InspectDeps, 'clientFor'>, cached: InspectResult, destParentId: string): Promise<InspectResult> {
+  const destConflict = await findConflict(deps.clientFor(cached.destAccountId), destParentId, cached.name);
+  return { ...cached, destConflict };
 }

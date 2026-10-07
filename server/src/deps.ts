@@ -6,7 +6,7 @@ import { AccountsRepo, AccountsService } from './auth/accounts';
 import { LoginFlow } from './auth/login-flow';
 import { DriveClient } from './drive/client';
 import { QuotaService } from './drive/quota';
-import { InspectionCache } from './drive/inspections';
+import { InspectionCache, InspectProgress } from './drive/inspections';
 import { ResyncService } from './drive/resync';
 import { JobsRepo } from './jobs/repo';
 import { JobEngine } from './jobs/engine';
@@ -25,6 +25,7 @@ export interface AppDeps {
   quota: QuotaService;
   clientFor: (accountId: string) => DriveClient;
   inspections: InspectionCache;
+  inspectProgress: InspectProgress;
   engine: JobEngine;
   resync: ResyncService;
   fetchFn: typeof fetch;
@@ -58,7 +59,8 @@ export function buildDeps(config: AppConfig, db: Db, overrides: Partial<AppDeps>
   const quota = overrides.quota ?? new QuotaService(db, settings);
   const clientFor = overrides.clientFor ?? ((accountId: string) => new DriveClient(accountId, accounts, fetchFn));
   const inspections = overrides.inspections ?? new InspectionCache();
+  const inspectProgress = overrides.inspectProgress ?? new InspectProgress();
   const engine = overrides.engine ?? new JobEngine({ repo: jobsRepo, accountsRepo, clientFor, quota, log: (m) => console.log(`[motor] ${m}`) });
   const resync = overrides.resync ?? new ResyncService({ repo: jobsRepo, clientFor });
-  return { db, settings, oauthClient, accountsRepo, accounts, login, jobsRepo, quota, clientFor, inspections, engine, resync, fetchFn, openBrowser, aboutEmail };
+  return { db, settings, oauthClient, accountsRepo, accounts, login, jobsRepo, quota, clientFor, inspections, inspectProgress, engine, resync, fetchFn, openBrowser, aboutEmail };
 }

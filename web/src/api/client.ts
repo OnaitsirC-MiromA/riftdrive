@@ -153,7 +153,10 @@ export const api = {
   removeAccount: (id: string) => del<{ ok: true }>(`/api/accounts/${id}`),
   testAccount: (id: string) => post<{ ok: boolean; email?: string; error?: string }>(`/api/accounts/${id}/test`),
   setDefaultAccount: (id: string) => post<{ ok: true }>(`/api/accounts/${id}/default`),
-  inspect: (body: { link: string; destAccountId?: string; destParentId?: string; destParentName?: string }) => post<Inspection>('/api/inspect', body),
+  // `inspectionId`: reaproveita a análise anterior quando só o destino mudou. `progressToken`: acompanha a leitura.
+  inspect: (body: { link: string; destAccountId?: string; destParentId?: string; destParentName?: string; inspectionId?: string; progressToken?: string }) =>
+    post<Inspection>('/api/inspect', body),
+  inspectProgress: (token: string) => request<{ filesSeen: number }>(`/api/inspect/progress?token=${encodeURIComponent(token)}`),
   // `parentId` aceita um id, `root`, `starred` ou `shared`; com `q`, busca pelo nome e ignora o pai.
   folders: (accountId: string, parentId: string, q = '') =>
     request<{ folders: Folder[] }>(`/api/drive/folders?accountId=${encodeURIComponent(accountId)}&parentId=${encodeURIComponent(parentId)}${q ? `&q=${encodeURIComponent(q)}` : ''}`),

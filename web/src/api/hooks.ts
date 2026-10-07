@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type FileStatus, type Job, type Settings } from './client';
+import { api, ApiError, type FileStatus, type Job, type Settings } from './client';
 
 const ACTIVE: Job['status'][] = ['running', 'queued'];
 export const isActive = (j: Job) => ACTIVE.includes(j.status);
@@ -34,6 +34,24 @@ export const useJobFiles = (id: string, status?: FileStatus, limit = 200, offset
 
 export const useFolders = (accountId: string | undefined, parentId: string, q = '') =>
   useQuery({ queryKey: ['folders', accountId, parentId, q], queryFn: () => api.folders(accountId!, parentId, q), enabled: Boolean(accountId), select: (d) => d.folders });
+
+// Enquanto a análise lê a origem, quantos arquivos já achou. 404 quer dizer
+// que ainda não começou ou já acabou: fica em null, sem virar erro na tela.
+export const useInspectProgress = (token: string | null) =>
+  useQuery({
+    queryKey: ['inspect-progress', token],
+    queryFn: async () => {
+      try {
+        return (await api.inspectProgress(token!)).filesSeen;
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) return null;
+        throw err;
+      }
+    },
+    enabled: Boolean(token),
+    refetchInterval: 800,
+    retry: false,
+  });
 
 function useInvalidate() {
   const qc = useQueryClient();

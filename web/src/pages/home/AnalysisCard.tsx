@@ -3,6 +3,7 @@ import type { Account, Inspection } from '../../api/client';
 import { useCreateJob } from '../../api/hooks';
 import { formatBytes, formatTime } from '../../lib/format';
 import { Banner } from '../../components/Banner';
+import { PortalMark } from '../../components/Brand';
 import { Button } from '../../components/Button';
 import { Field, Select } from '../../components/Field';
 import { FolderPicker, type PickedFolder } from '../../components/FolderPicker';
@@ -16,11 +17,13 @@ interface Props {
   onReinspect: (dest: { destAccountId: string; destParentId: string; destParentName: string }) => void;
   onCancel: () => void;
   onStarted: () => void;
+  /** Reconferindo o destino: o cartão fica, com o status ao lado dele e o início travado. */
+  busy?: { text: string; filesSeen: number | null } | null;
 }
 
 // O coração do app: o que a análise descobriu, por qual caminho vai, o que fica
 // de fora, onde vai parar e se cabe na cota. Um botão inicia.
-export function AnalysisCard({ inspection: i, accounts, onReinspect, onCancel, onStarted }: Props) {
+export function AnalysisCard({ inspection: i, accounts, onReinspect, onCancel, onStarted, busy = null }: Props) {
   const [name, setName] = useState(i.name);
   const [conflict, setConflict] = useState<'rename' | 'merge'>('rename');
   const [showBlocked, setShowBlocked] = useState(false);
@@ -112,6 +115,13 @@ export function AnalysisCard({ inspection: i, accounts, onReinspect, onCancel, o
               <span className="px-2.5 py-1.5 rounded-lg bg-surface border border-line">{i.destEmail}</span>
             )}
             <FolderPicker accountId={i.destAccountId} value={dest} onChange={(f) => onReinspect({ destAccountId: i.destAccountId, destParentId: f.id, destParentName: f.name })} />
+            {busy && (
+              <span className="inline-flex items-center gap-2 text-muted text-[12px]" aria-live="polite">
+                <PortalMark size={16} animated className="text-fg" />
+                {busy.text}
+                {busy.filesSeen !== null && <span className="num">· {s.home.filesSeen(busy.filesSeen)}</span>}
+              </span>
+            )}
           </div>
           <Field label={s.analysis.nameLabel} value={name} onChange={(e) => setName(e.target.value)} className="max-w-md" />
           {i.destConflict && (
@@ -147,7 +157,7 @@ export function AnalysisCard({ inspection: i, accounts, onReinspect, onCancel, o
 
       <footer className="flex justify-end gap-2 pt-1">
         <Button onClick={onCancel}>{s.analysis.cancel}</Button>
-        <Button variant="primary" onClick={start} disabled={create.isPending}>
+        <Button variant="primary" onClick={start} disabled={create.isPending || Boolean(busy)}>
           {create.isPending ? s.analysis.starting : s.analysis.start}
         </Button>
       </footer>
