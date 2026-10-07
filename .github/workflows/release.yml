@@ -73,11 +73,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Sem `registry-url` de propósito: com ele o setup-node grava no .npmrc um
+      # `_authToken=${NODE_AUTH_TOKEN}` e exporta um NODE_AUTH_TOKEN de mentira
+      # (XXXXX-XXXXX…). O npm então publica com esse token falso em vez de trocar
+      # o OIDC, e o registro responde E404 (actions/setup-node#1551).
       - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-          registry-url: https://registry.npmjs.org
+        with: { node-version: '22', cache: npm }
 
       # O npm que acompanha o Node 22 é o 10.x e não sabe falar OIDC; o trusted
       # publishing pede 11.5.1 ou mais novo. Atualizar antes de baixar os
