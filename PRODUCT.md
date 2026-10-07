@@ -2,7 +2,7 @@
 
 ## O que é
 
-RiftDrive copia pastas de um Google Drive para outro. Você cola um link, o app
+RiftDrive copia pastas de um Google Drive para outro. Você cola um link ou navega até a pasta, o app
 descobre o que pode e o que não pode copiar, diz por qual caminho vai e leva.
 
 Dois caminhos, sempre explícitos:

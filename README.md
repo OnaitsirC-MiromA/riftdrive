@@ -1,6 +1,6 @@
 # RiftDrive
 
-**Copie pastas de um Google Drive para outro.** Cole o link, escolha onde vai parar, e o RiftDrive leva — de preferência **dentro do próprio Google**, sem que um único byte passe pela sua máquina.
+**Copie pastas de um Google Drive para outro.** Cole o link ou navegue até a pasta (Compartilhados comigo, Com estrela, busca pelo nome), escolha onde vai parar, e o RiftDrive leva — de preferência **dentro do próprio Google**, sem que um único byte passe pela sua máquina.
 
 Dois caminhos, sempre explícitos:
 

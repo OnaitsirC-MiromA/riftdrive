@@ -62,3 +62,25 @@ export const CopyIcon = (p: SVGProps<SVGSVGElement>) => (
     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
   </svg>
 );
+export const SearchIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+);
+// Atalho do Drive: a seta que dobra e sai — aponta para outro lugar.
+export const ShortcutIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <path d="M4 20v-6a4 4 0 0 1 4-4h12" />
+    <path d="m15 5 5 5-5 5" />
+  </svg>
+);
+// "Compartilhados comigo": duas pessoas.
+export const PeopleIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <circle cx="9" cy="8" r="3.5" />
+    <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+    <path d="M16 4.6a3.5 3.5 0 0 1 0 6.8" />
+    <path d="M17.5 13.7a6.5 6.5 0 0 1 4 6.3" />
+  </svg>
+);

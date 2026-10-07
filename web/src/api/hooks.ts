@@ -32,8 +32,8 @@ export const useJob = (id: string) =>
 export const useJobFiles = (id: string, status?: FileStatus, limit = 200, offset = 0) =>
   useQuery({ queryKey: ['jobFiles', id, status ?? 'all', limit, offset], queryFn: () => api.jobFiles(id, status, limit, offset), select: (d) => d.files });
 
-export const useFolders = (accountId: string | undefined, parentId: string) =>
-  useQuery({ queryKey: ['folders', accountId, parentId], queryFn: () => api.folders(accountId!, parentId), enabled: Boolean(accountId), select: (d) => d.folders });
+export const useFolders = (accountId: string | undefined, parentId: string, q = '') =>
+  useQuery({ queryKey: ['folders', accountId, parentId, q], queryFn: () => api.folders(accountId!, parentId, q), enabled: Boolean(accountId), select: (d) => d.folders });
 
 function useInvalidate() {
   const qc = useQueryClient();

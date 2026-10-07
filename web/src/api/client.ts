@@ -118,6 +118,8 @@ export interface Quota {
 export interface Folder {
   id: string;
   name: string;
+  /** Atalho para pasta; `id` já é o da pasta alvo. */
+  shortcut?: true;
 }
 
 export class ApiError extends Error {
@@ -152,7 +154,9 @@ export const api = {
   testAccount: (id: string) => post<{ ok: boolean; email?: string; error?: string }>(`/api/accounts/${id}/test`),
   setDefaultAccount: (id: string) => post<{ ok: true }>(`/api/accounts/${id}/default`),
   inspect: (body: { link: string; destAccountId?: string; destParentId?: string; destParentName?: string }) => post<Inspection>('/api/inspect', body),
-  folders: (accountId: string, parentId: string) => request<{ folders: Folder[] }>(`/api/drive/folders?accountId=${encodeURIComponent(accountId)}&parentId=${encodeURIComponent(parentId)}`),
+  // `parentId` aceita um id, `root`, `starred` ou `shared`; com `q`, busca pelo nome e ignora o pai.
+  folders: (accountId: string, parentId: string, q = '') =>
+    request<{ folders: Folder[] }>(`/api/drive/folders?accountId=${encodeURIComponent(accountId)}&parentId=${encodeURIComponent(parentId)}${q ? `&q=${encodeURIComponent(q)}` : ''}`),
   jobs: () => request<{ jobs: Job[] }>('/api/jobs'),
   job: (id: string) => request<{ job: Job; counts: Record<FileStatus, number> }>(`/api/jobs/${id}`),
   jobFiles: (id: string, status?: FileStatus, limit = 200, offset = 0) =>
