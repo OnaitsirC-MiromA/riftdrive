@@ -2,6 +2,12 @@ name: Release
 
 # Publica uma versão: os executáveis de cada sistema no GitHub Releases e o
 # pacote no npm. Dispara por tag (v2.0.0, v2.1.0…).
+#
+# O npm é publicado por trusted publishing (OIDC): nenhum token guardado em
+# segredo, a credencial dura só esta execução. Pré-requisitos, uma vez só:
+#   1. o pacote já existe no npm (a primeira versão sai da máquina do dono);
+#   2. em npmjs.com → pacote → Settings → Trusted Publisher: GitHub Actions,
+#      owner OnaitsirC-MiromA, repo riftdrive, workflow release.yml.
 on:
   push:
     tags: ['v*']
@@ -73,18 +79,13 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
 
-      # Antes de qualquer trabalho: se o segredo não estiver lá, é melhor saber
-      # agora do que depois de baixar cinco binários e montar o pacote inteiro.
-      - name: Conferir o segredo do npm
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # O npm que acompanha o Node 22 é o 10.x e não sabe falar OIDC; o trusted
+      # publishing pede 11.5.1 ou mais novo. Atualizar antes de baixar os
+      # binários: se isto falhar, é melhor saber agora.
+      - name: Atualizar o npm para o trusted publishing
         run: |
-          if [ -z "${NODE_AUTH_TOKEN}" ]; then
-            echo "::error::O segredo NPM_TOKEN está vazio ou não existe. Defina em Settings → Secrets and variables → Actions."
-            exit 1
-          fi
-          echo "NPM_TOKEN presente (${#NODE_AUTH_TOKEN} caracteres)"
+          npm install -g npm@latest
+          npm --version
 
       - uses: actions/download-artifact@v4
         with: { path: artefatos, merge-multiple: true }
@@ -110,8 +111,8 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+      # Sem NODE_AUTH_TOKEN de propósito: o npm detecta o OIDC do Actions e troca
+      # por uma credencial de curta duração. A proveniência sai junto.
       - name: Publicar no npm
         if: startsWith(github.ref, 'refs/tags/')
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --provenance --access public
