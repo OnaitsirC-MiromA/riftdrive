@@ -84,3 +84,9 @@ export const PeopleIcon = (p: SVGProps<SVGSVGElement>) => (
     <path d="M17.5 13.7a6.5 6.5 0 0 1 4 6.3" />
   </svg>
 );
+export const FolderPlusIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <path d="M12 11v6M9 14h6" />
+  </svg>
+);

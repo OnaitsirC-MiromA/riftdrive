@@ -45,7 +45,7 @@ Não há script de typecheck separado: `tsc --noEmit` roda no `build` de cada wo
 
 ## Mapa da web (`web/src`)
 
-`App.tsx` rotas `/`, `/configurar`, `/copia/:id`, `/configuracoes` · `api/client.ts` DTOs + `api.*` · `api/hooks.ts` TanStack Query (polling 2 s com job ativo) · `pages/Home` (caixa do link ou `FolderBrowser` para navegar até a origem + `home/AnalysisCard` inline + `home/JobLists`) · `pages/Setup` (assistente OAuth) · `pages/Job` · `pages/Settings` · `components/` (`Brand`, `PathChip`, `Banner`, `JobCard`, `FolderPicker` + `FolderBrowser` (navegador: busca, conta, Compartilhados comigo/Com estrela/Meu Drive, atalhos), `Shell`…).
+`App.tsx` rotas `/`, `/configurar`, `/copia/:id`, `/configuracoes` · `api/client.ts` DTOs + `api.*` · `api/hooks.ts` TanStack Query (polling 2 s com job ativo) · `pages/Home` (caixa do link ou `FolderBrowser` para navegar até a origem + `home/AnalysisCard` inline + `home/JobLists`) · `pages/Setup` (assistente OAuth) · `pages/Job` · `pages/Settings` · `components/` (`Brand`, `PathChip`, `Banner`, `JobCard`, `FolderPicker` + `FolderBrowser` (navegador: busca, conta, Compartilhados comigo/Com estrela/Meu Drive, atalhos, "Nova pasta" no destino), `Shell`…).
 
 ## Documentos
 

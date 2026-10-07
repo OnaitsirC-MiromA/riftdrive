@@ -51,6 +51,12 @@ export function useJobActions() {
   };
 }
 
+// Criou uma pasta: toda lista de pastas em cache pode estar desatualizada.
+export function useCreateFolder() {
+  const invalidate = useInvalidate();
+  return useMutation({ mutationFn: api.createFolder, onSuccess: () => invalidate('folders') });
+}
+
 export function useCreateJob() {
   const invalidate = useInvalidate();
   return useMutation({ mutationFn: api.createJob, onSuccess: () => invalidate('jobs', 'quota') });

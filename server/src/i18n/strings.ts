@@ -25,6 +25,7 @@ export const t = {
   },
   drive: {
     myDrive: 'Meu Drive',
+    invalidName: 'Dê um nome para a pasta.',
   },
   settings: {
     invalid: 'Configuração inválida: modo de cota (limit/unlimited), GB por dia (> 0), hora de renovação (0–23) ou destino padrão.',

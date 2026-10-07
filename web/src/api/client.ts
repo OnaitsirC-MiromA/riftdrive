@@ -157,6 +157,7 @@ export const api = {
   // `parentId` aceita um id, `root`, `starred` ou `shared`; com `q`, busca pelo nome e ignora o pai.
   folders: (accountId: string, parentId: string, q = '') =>
     request<{ folders: Folder[] }>(`/api/drive/folders?accountId=${encodeURIComponent(accountId)}&parentId=${encodeURIComponent(parentId)}${q ? `&q=${encodeURIComponent(q)}` : ''}`),
+  createFolder: (body: { accountId: string; parentId: string; name: string }) => post<{ folder: Folder }>('/api/drive/folders', body),
   jobs: () => request<{ jobs: Job[] }>('/api/jobs'),
   job: (id: string) => request<{ job: Job; counts: Record<FileStatus, number> }>(`/api/jobs/${id}`),
   jobFiles: (id: string, status?: FileStatus, limit = 200, offset = 0) =>

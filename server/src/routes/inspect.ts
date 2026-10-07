@@ -63,6 +63,23 @@ export async function inspectRoutes(app: FastifyInstance, opts: { deps: AppDeps 
       return reply.code(502).send({ error: err instanceof Error ? err.message : String(err) });
     }
   });
+
+  // Cria uma pasta dentro da pasta mãe (ou de `root`), para quem escolhe o
+  // destino poder abrir uma "Cursos 2026" sem sair do app. A pasta da cópia em
+  // si o motor cria depois, com o nome da origem.
+  app.post<{ Body: { accountId?: string; parentId?: string; name?: string } }>('/api/drive/folders', async (req, reply) => {
+    const acc = (req.body?.accountId ? accountsRepo.get(req.body.accountId) : null) ?? (req.body?.accountId ? null : accountsRepo.defaultDest());
+    if (!acc) return reply.code(404).send({ error: t.accounts.notFound });
+    const name = (req.body?.name ?? '').trim();
+    if (!name) return reply.code(400).send({ error: t.drive.invalidName, code: 'invalid_name' });
+    try {
+      const created = await clientFor(acc.id).createFolder(name, req.body?.parentId || 'root');
+      return { folder: { id: created.id, name: created.name } };
+    } catch (err) {
+      if (isAuthExpired(err)) return reply.code(503).send({ error: t.jobs.auth, code: 'auth' });
+      return reply.code(502).send({ error: err instanceof Error ? err.message : String(err) });
+    }
+  });
 }
 
 export interface FolderRow {

@@ -123,3 +123,29 @@ describe('GET /api/drive/folders', () => {
     ]);
   });
 });
+
+describe('POST /api/drive/folders', () => {
+  it('cria a pasta dentro da pasta mãe e ela aparece na listagem seguinte', async () => {
+    const w = world();
+    const root = w.fake.rootOf('dest');
+    const mae = w.fake.addFolder({ name: 'Projetos', parentId: root, owner: 'dest@x.com' });
+    const r = await w.app.inject({ method: 'POST', url: '/api/drive/folders', payload: { accountId: w.dest.id, parentId: mae.id, name: '  Cursos 2026  ' } });
+    expect(r.statusCode).toBe(200);
+    expect(r.json().folder).toEqual({ id: expect.any(String), name: 'Cursos 2026' });
+    const lista = await w.app.inject({ url: `/api/drive/folders?accountId=${w.dest.id}&parentId=${mae.id}` });
+    expect(lista.json().folders).toEqual([{ id: r.json().folder.id, name: 'Cursos 2026' }]);
+  });
+
+  it('`root` vale como pasta mãe; nome vazio e conta desconhecida são recusados', async () => {
+    const w = world();
+    const ok = await w.app.inject({ method: 'POST', url: '/api/drive/folders', payload: { accountId: w.dest.id, parentId: 'root', name: 'Na raiz' } });
+    expect(ok.statusCode).toBe(200);
+    expect(w.fake.children(w.fake.rootOf('dest')).map((n) => n.name)).toContain('Na raiz');
+    const vazio = await w.app.inject({ method: 'POST', url: '/api/drive/folders', payload: { accountId: w.dest.id, parentId: 'root', name: '   ' } });
+    expect(vazio.statusCode).toBe(400);
+    expect(vazio.json()).toMatchObject({ code: 'invalid_name' });
+    const semConta = await w.app.inject({ method: 'POST', url: '/api/drive/folders', payload: { accountId: 'nope', parentId: 'root', name: 'X' } });
+    expect(semConta.statusCode).toBe(404);
+  });
+});
+

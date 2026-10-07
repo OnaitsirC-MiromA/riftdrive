@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { Account, Folder } from '../api/client';
-import { useFolders } from '../api/hooks';
+import { useCreateFolder, useFolders } from '../api/hooks';
 import { Button } from './Button';
-import { ChevronRight, FolderIcon, PeopleIcon, SearchIcon, ShortcutIcon, StarIcon } from './icons';
+import { ChevronRight, FolderIcon, FolderPlusIcon, PeopleIcon, SearchIcon, ShortcutIcon, StarIcon } from './icons';
 import { s } from '../i18n/strings';
 
 export interface PickedFolder {
@@ -114,8 +114,32 @@ export function FolderBrowser({
     </>
   );
 
+  // "Nova pasta", só no destino: abre a pasta mãe de uma cópia sem sair do app.
+  const createFolder = useCreateFolder();
+  const [naming, setNaming] = useState(false);
+  const [newName, setNewName] = useState('');
+  const stopNaming = () => {
+    setNaming(false);
+    setNewName('');
+    createFolder.reset();
+  };
+  const create = () => {
+    const name = newName.trim();
+    if (!name || createFolder.isPending) return;
+    createFolder.mutate(
+      { accountId, parentId: current.id, name },
+      {
+        onSuccess: ({ folder }) => {
+          stopNaming();
+          enter({ id: folder.id, name: folder.name });
+        },
+      },
+    );
+  };
+
   const hasStarred = Boolean(starred.data && starred.data.length > 0);
   const canChoose = !searching && !(forSource && atRoot);
+  const canCreate = !forSource && !searching;
 
   return (
     <div className="card p-3 text-[13px] w-full">
@@ -195,14 +219,54 @@ export function FolderBrowser({
         )}
       </div>
 
-      <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-line">
-        <Button size="sm" onClick={onClose}>
-          {s.common.close}
-        </Button>
-        <Button size="sm" variant="primary" disabled={!canChoose} onClick={() => onChoose(current)}>
-          {s.common.choose} “{current.name}”
-        </Button>
+      <div className="flex flex-wrap items-center justify-end gap-2 mt-2 pt-2 border-t border-line">
+        {canCreate && naming ? (
+          <form
+            className="flex-1 flex items-center gap-2 min-w-0"
+            onSubmit={(e) => {
+              e.preventDefault();
+              create();
+            }}
+          >
+            <input
+              autoFocus
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Escape' && stopNaming()}
+              placeholder={s.common.newFolderName}
+              aria-label={s.common.newFolderName}
+              autoComplete="off"
+              className="flex-1 min-w-0 bg-surface border border-line rounded-lg px-3 py-1.5 text-[13px] text-fg placeholder:text-faint focus-visible:border-violet/60"
+            />
+            <Button size="sm" variant="primary" type="submit" disabled={!newName.trim() || createFolder.isPending}>
+              {s.common.create}
+            </Button>
+            <Button size="sm" onClick={stopNaming}>
+              {s.common.cancel}
+            </Button>
+          </form>
+        ) : (
+          <>
+            {canCreate && (
+              <Button variant="link" size="sm" className="mr-auto" onClick={() => setNaming(true)}>
+                <FolderPlusIcon width={14} height={14} />
+                {s.common.newFolder}
+              </Button>
+            )}
+            <Button size="sm" onClick={onClose}>
+              {s.common.close}
+            </Button>
+            <Button size="sm" variant="primary" disabled={!canChoose} onClick={() => onChoose(current)}>
+              {s.common.choose} “{current.name}”
+            </Button>
+          </>
+        )}
       </div>
+      {createFolder.error ? (
+        <div className="text-red text-[12px] mt-1.5" role="alert">
+          {(createFolder.error as Error).message}
+        </div>
+      ) : null}
     </div>
   );
 }
