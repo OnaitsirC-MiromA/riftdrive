@@ -263,10 +263,29 @@ export class FakeDrive {
     if (path === '/drive/v3/files' && method === 'GET') {
       const q = u.searchParams.get('q') ?? '';
       const parent = resolve(q.match(/'([^']+)' in parents/)?.[1]);
-      const mime = q.match(/mimeType = '([^']+)'/)?.[1];
-      // Dois tipos de consulta: filhos de uma pasta, ou "tudo com estrela".
-      let kids = parent !== undefined ? this.children(parent) : /starred = true/.test(q) ? [...this.nodes.values()].filter((n) => n.starred && !n.trashed) : [];
-      kids = kids.filter((n) => this.canRead(n, acc.id) && (!mime || n.mimeType === mime)).sort((a, b) => a.name.localeCompare(b.name));
+      const mimes = [...q.matchAll(/mimeType = '([^']+)'/g)].map((m) => m[1]);
+      // `name contains '…'` com os escapes da API desfeitos (\' e \\).
+      const term = q
+        .match(/name contains '((?:\\.|[^'\\])*)'/)?.[1]
+        ?.replace(/\\(.)/g, '$1')
+        .toLowerCase();
+      const all = () => [...this.nodes.values()].filter((n) => !n.trashed);
+      // Quatro tipos de consulta: filhos de uma pasta, "tudo com estrela",
+      // "compartilhado comigo" (leitura dada direto ao nó, por outro dono) e
+      // busca pelo nome em tudo que a conta enxerga.
+      let kids =
+        parent !== undefined
+          ? this.children(parent)
+          : /starred = true/.test(q)
+            ? all().filter((n) => n.starred)
+            : /sharedWithMe = true/.test(q)
+              ? all().filter((n) => n.ownerEmail !== acc.email && (n.readers.has(acc.id) || n.readers.has('*')))
+              : term !== undefined
+                ? all()
+                : [];
+      kids = kids
+        .filter((n) => this.canRead(n, acc.id) && (mimes.length === 0 || mimes.includes(n.mimeType)) && (term === undefined || n.name.toLowerCase().includes(term)))
+        .sort((a, b) => a.name.localeCompare(b.name));
       const size = Number(u.searchParams.get('pageSize') ?? 100);
       const off = Number(u.searchParams.get('pageToken') ?? 0);
       const page = kids.slice(off, off + size);

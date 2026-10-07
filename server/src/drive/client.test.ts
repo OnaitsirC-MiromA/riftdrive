@@ -66,6 +66,23 @@ describe('DriveClient', () => {
     expect(new URL(calls[1].url).searchParams.get('pageToken')).toBe('T');
   });
 
+  it('listSharedWithMe pede o que outros compartilharam: pastas e atalhos, fora da lixeira', async () => {
+    const { f, calls } = scripted([() => json(200, { files: [{ id: '1', name: 'Curso', mimeType: 'application/vnd.google-apps.folder' }] })]);
+    const list = await new DriveClient('acc', tokens, f, noSleep).listSharedWithMe();
+    expect(list.map((x) => x.name)).toEqual(['Curso']);
+    expect(new URL(calls[0].url).searchParams.get('q')).toBe(
+      "sharedWithMe = true and trashed = false and (mimeType = 'application/vnd.google-apps.folder' or mimeType = 'application/vnd.google-apps.shortcut')",
+    );
+  });
+
+  it('searchFolders procura pelo nome em toda a conta e escapa aspas e barras', async () => {
+    const { f, calls } = scripted([() => json(200, { files: [] })]);
+    await new DriveClient('acc', tokens, f, noSleep).searchFolders("O'Neil \\ 2026");
+    expect(new URL(calls[0].url).searchParams.get('q')).toBe(
+      "name contains 'O\\'Neil \\\\ 2026' and trashed = false and (mimeType = 'application/vnd.google-apps.folder' or mimeType = 'application/vnd.google-apps.shortcut')",
+    );
+  });
+
   it('erro da API vira DriveError com reason', async () => {
     const { f } = scripted([() => gerr(403, 'cannotCopyFile', 'This file cannot be copied by the user.')]);
     await expect(new DriveClient('acc', tokens, f, noSleep).copyFile('a', 'n', 'p')).rejects.toMatchObject({ status: 403, reason: 'cannotCopyFile' });

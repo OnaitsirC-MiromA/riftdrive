@@ -70,4 +70,56 @@ describe('GET /api/drive/folders', () => {
     expect(r.statusCode).toBe(200);
     expect(r.json().folders.map((f: { name: string }) => f.name)).toEqual(['Cursos 2026', 'Projetos']);
   });
+
+  it('parentId=shared lista pastas e atalhos para pasta que outros compartilharam com a conta', async () => {
+    const w = world();
+    const root = w.fake.rootOf('dest');
+    w.fake.addFolder({ name: 'Minha própria', parentId: root, owner: 'dest@x.com' });
+    const curso = w.fake.addFolder({ name: 'Curso da Ana', parentId: 'ext', owner: 'ana@x.com' });
+    const alvo = w.fake.addFolder({ name: 'Alvo', parentId: 'ext', owner: 'bia@x.com' });
+    const atalho = w.fake.addShortcut({ name: 'Atalho da Bia', parentId: 'ext', targetId: alvo.id, owner: 'bia@x.com' });
+    const arq = w.fake.addFile({ name: 'solto.pdf', parentId: 'ext', owner: 'ana@x.com' });
+    w.fake.addFolder({ name: 'Privada', parentId: 'ext', owner: 'ana@x.com' });
+    w.fake.share(curso.id, 'dest');
+    w.fake.share(atalho.id, 'dest');
+    w.fake.share(arq.id, 'dest');
+    const r = await w.app.inject({ url: `/api/drive/folders?accountId=${w.dest.id}&parentId=shared` });
+    expect(r.statusCode).toBe(200);
+    expect(r.json().folders).toEqual([
+      { id: alvo.id, name: 'Atalho da Bia', shortcut: true },
+      { id: curso.id, name: 'Curso da Ana' },
+    ]);
+  });
+
+  it('q= busca pastas pelo nome em toda a conta, sem diferenciar maiúsculas, ignorando o pai', async () => {
+    const w = world();
+    const root = w.fake.rootOf('dest');
+    const sub = w.fake.addFolder({ name: 'Projetos', parentId: root, owner: 'dest@x.com' });
+    w.fake.addFolder({ name: 'Curso de Lean', parentId: sub.id, owner: 'dest@x.com' });
+    w.fake.addFolder({ name: 'Fotos', parentId: root, owner: 'dest@x.com' });
+    w.fake.addFile({ name: 'curso.pdf', parentId: root, owner: 'dest@x.com' });
+    const ext = w.fake.addFolder({ name: 'CURSO Zen', parentId: 'ext', owner: 'ana@x.com' });
+    w.fake.share(ext.id, 'dest');
+    w.fake.addFolder({ name: 'Curso privado', parentId: 'ext', owner: 'ana@x.com' });
+    const r = await w.app.inject({ url: `/api/drive/folders?accountId=${w.dest.id}&parentId=root&q=curso` });
+    expect(r.statusCode).toBe(200);
+    expect(r.json().folders.map((f: { name: string }) => f.name)).toEqual(['Curso de Lean', 'CURSO Zen']);
+  });
+
+  it('atalhos para pasta entram na listagem com o id da pasta alvo; atalhos para arquivo ficam de fora', async () => {
+    const w = world();
+    const root = w.fake.rootOf('dest');
+    const alvo = w.fake.addFolder({ name: 'Alvo', parentId: 'ext', owner: 'ana@x.com' });
+    const arq = w.fake.addFile({ name: 'a.pdf', parentId: 'ext', owner: 'ana@x.com' });
+    w.fake.share(alvo.id, 'dest');
+    w.fake.share(arq.id, 'dest');
+    w.fake.addShortcut({ name: 'Para o Alvo', parentId: root, targetId: alvo.id, owner: 'dest@x.com' });
+    w.fake.addShortcut({ name: 'Para o arquivo', parentId: root, targetId: arq.id, owner: 'dest@x.com' });
+    w.fake.addFolder({ name: 'Normal', parentId: root, owner: 'dest@x.com' });
+    const r = await w.app.inject({ url: `/api/drive/folders?accountId=${w.dest.id}&parentId=root` });
+    expect(r.json().folders).toEqual([
+      { id: expect.any(String), name: 'Normal' },
+      { id: alvo.id, name: 'Para o Alvo', shortcut: true },
+    ]);
+  });
 });

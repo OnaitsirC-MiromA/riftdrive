@@ -6,6 +6,10 @@ export const SHORTCUT_MIME = 'application/vnd.google-apps.shortcut';
 
 // Docs, Sheets, Slides…: não têm bytes próprios (nem size nem md5), só se
 // copiam dentro do Google ou se exportam convertidos.
+const FOLDERS_OR_SHORTCUTS = `(mimeType = '${FOLDER_MIME}' or mimeType = '${SHORTCUT_MIME}')`;
+// Dentro de aspas simples na consulta `q`, barra e aspa simples levam barra antes.
+const escapeQ = (s: string): string => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
 export const isNativeGoogleMime = (m: string): boolean => m.startsWith('application/vnd.google-apps.') && m !== FOLDER_MIME && m !== SHORTCUT_MIME;
 
 export const FILE_FIELDS =
@@ -160,6 +164,18 @@ export class DriveClient {
   // As pastas que o usuário marcou com estrela no Drive, estejam onde estiverem.
   listStarredFolders(): Promise<DriveFile[]> {
     return this.listQuery(`starred = true and mimeType = '${FOLDER_MIME}' and trashed = false`);
+  }
+
+  // O que outras pessoas compartilharam com a conta, só o que dá para copiar:
+  // pastas e atalhos (o alvo do atalho é conferido por quem lista).
+  listSharedWithMe(): Promise<DriveFile[]> {
+    return this.listQuery(`sharedWithMe = true and trashed = false and ${FOLDERS_OR_SHORTCUTS}`);
+  }
+
+  // Busca pelo nome em toda a conta — Meu Drive, compartilhados, drives
+  // compartilhados. Aspas e barras no termo são escapadas como a API exige.
+  searchFolders(term: string): Promise<DriveFile[]> {
+    return this.listQuery(`name contains '${escapeQ(term)}' and trashed = false and ${FOLDERS_OR_SHORTCUTS}`);
   }
 
   // Cópia servidor-a-servidor: o "rift". Os bytes nunca saem do Google.
