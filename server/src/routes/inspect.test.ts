@@ -214,6 +214,20 @@ describe('GET /api/inspect/progress', () => {
     expect((await w.app.inject({ url: '/api/inspect/progress?token=abc' })).statusCode).toBe(404);
   });
 
+  it('o token nasce em zero antes da leitura começar: a SPA nunca vê 404 no meio', async () => {
+    const w = world();
+    w.fake.share(w.src.id, 'dest');
+    const vistos: number[] = [];
+    const original = w.deps.inspectProgress.set.bind(w.deps.inspectProgress);
+    w.deps.inspectProgress.set = (token, n) => {
+      vistos.push(n);
+      original(token, n);
+    };
+    await w.app.inject({ method: 'POST', url: '/api/inspect', payload: { link: w.link, progressToken: 'zero' } });
+    expect(vistos[0]).toBe(0);
+    expect(vistos.at(-1)).toBe(2);
+  });
+
   it('enquanto a leitura corre, o token diz quantos arquivos já viu', async () => {
     const w = world();
     w.deps.inspectProgress.set('t1', 37);

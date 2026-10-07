@@ -116,7 +116,7 @@ export function AnalysisCard({ inspection: i, accounts, onReinspect, onCancel, o
             )}
             <FolderPicker accountId={i.destAccountId} value={dest} onChange={(f) => onReinspect({ destAccountId: i.destAccountId, destParentId: f.id, destParentName: f.name })} />
             {busy && (
-              <span className="inline-flex items-center gap-2 text-muted text-[12px]" aria-live="polite">
+              <span className="basis-full inline-flex items-center gap-2 text-muted text-[12px]" aria-live="polite">
                 <PortalMark size={16} animated className="text-fg" />
                 {busy.text}
                 {busy.filesSeen !== null && <span className="num">· {s.home.filesSeen(busy.filesSeen)}</span>}

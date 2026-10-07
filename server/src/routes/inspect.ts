@@ -52,7 +52,10 @@ export async function inspectRoutes(app: FastifyInstance, opts: { deps: AppDeps 
     const link = (req.body?.link ?? '').trim();
     if (!link) return reply.code(400).send({ error: t.inspect.invalidLink, code: 'invalid_link' });
 
+    // O token nasce em zero antes da primeira listagem: a SPA começa a consultar
+    // na hora e não deve ver 404 enquanto a leitura ainda não contou nada.
     const token = req.body?.progressToken;
+    if (token) inspectProgress.set(token, 0);
     const onProgress = token ? (n: number) => inspectProgress.set(token, n) : undefined;
     try {
       const { result, tree } = await inspect({ clientFor, accounts: accountsRepo.list(), quota, onProgress }, { link, destAccountId: dest.id, destParentId, destParentName });
