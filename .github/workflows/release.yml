@@ -7,7 +7,8 @@ name: Release
 # segredo, a credencial dura só esta execução. Pré-requisitos, uma vez só:
 #   1. o pacote já existe no npm (a primeira versão sai da máquina do dono);
 #   2. em npmjs.com → pacote → Settings → Trusted Publisher: GitHub Actions,
-#      owner OnaitsirC-MiromA, repo riftdrive, workflow release.yml.
+#      owner OnaitsirC-MiromA, repo riftdrive, workflow release.yml, environment
+#      em branco. Os campos são comparados letra a letra, maiúsculas incluídas.
 on:
   push:
     tags: ['v*']
@@ -19,6 +20,38 @@ permissions:
   id-token: write
 
 jobs:
+  # Antes de gastar a matriz: o npm aceita o OIDC desta execução? É o mesmo
+  # pedido que o `npm publish` faz por dentro, só que com a resposta à mostra —
+  # o npm engole a recusa (só aparece em loglevel verbose) e termina num
+  # ENEEDAUTH mudo. Falha aqui = Trusted Publisher ausente ou com algum campo
+  # diferente das afirmações impressas abaixo.
+  conferir-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trocar o OIDC do Actions pela credencial do npm
+        run: |
+          nome=$(jq -r .name package.json)
+          id_token=$(curl -fsS -H "Accept: application/json" \
+            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
+
+          # O que o npm compara com o Trusted Publisher (só as afirmações, sem a
+          # assinatura; nada aqui é segredo num repositório público).
+          echo "Afirmações do token:"
+          printf '%s' "$id_token" | cut -d. -f2 | python3 -c 'import sys, base64, json; p = sys.stdin.read().strip(); c = json.loads(base64.urlsafe_b64decode(p + "=" * (-len(p) % 4))); print(json.dumps({k: c.get(k) for k in ("repository", "repository_owner", "job_workflow_ref", "environment", "ref")}, indent=2))'
+
+          codigo=$(curl -sS -o resposta.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $id_token" \
+            "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/$nome")
+          if [ "$codigo" != "200" ]; then
+            echo "::error::npm recusou o OIDC (HTTP $codigo): $(cat resposta.json)"
+            exit 1
+          fi
+          # A resposta é uma credencial de publicação de curta duração: não mostrar.
+          rm -f resposta.json
+          echo "npm aceitou o OIDC de $nome."
+
   # Testar uma vez só, antes de gastar a matriz inteira: se a suíte quebra, não
   # há por que construir cinco binários.
   testar:
@@ -69,7 +102,7 @@ jobs:
           retention-days: 1
 
   publicar:
-    needs: binarios
+    needs: [binarios, conferir-npm]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
